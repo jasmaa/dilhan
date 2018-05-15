@@ -21,7 +21,9 @@ public class GraphToolDriver extends Application {
 	GraphicsContext gc;
 	List<GraphNode> graphNodes;
 	
+	
 	boolean wasDragging;
+	GraphNode selectedNode;
 	List<GraphNode> selectedNodes = new ArrayList<GraphNode>();
 	
 	public static void main(String[] args) {
@@ -32,7 +34,7 @@ public class GraphToolDriver extends Application {
     public void start(Stage pStage) {
         
     	Group root = new Group();
-    	Scene s = new Scene(root, 500, 500, Color.GRAY);
+    	Scene s = new Scene(root, 800, 800, Color.GRAY);
     	
     	GraphNode node1 = new GraphNode(0, 0);
     	GraphNode node2 = new GraphNode(100, 100);
@@ -50,11 +52,12 @@ public class GraphToolDriver extends Application {
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.getKeyFrames().add(
                 new KeyFrame(Duration.millis(1),e->{
-                	gc.clearRect(0, 0, 500, 500);
+                	
+                	gc.clearRect(0, 0, 800, 800);
             		
                 	// Draw edges
                 	gc.setStroke(Color.TURQUOISE);
-                	gc.setLineWidth(5);
+                	gc.setLineWidth(3);
                 	for(GraphNode n : graphNodes){
                 		Collections.sort(n.neighbors);
                 		int counter = 0;
@@ -94,19 +97,31 @@ public class GraphToolDriver extends Application {
         timeline.playFromStart();
 		
 		// Set up canvas
-    	canvas = new Canvas(500,500);
+    	canvas = new Canvas(800,800);
     	
     	// Canvas events
-    	canvas.setOnMouseDragged(e->{
+    	canvas.setOnDragDetected(e->{
     		for(GraphNode n : graphNodes){
         		if(Math.abs(e.getSceneX()-15-n.getX()) < 15 && Math.abs(e.getSceneY()-15-n.getY()) < 15){
-        			n.setX(e.getSceneX()-15);
-        			n.setY(e.getSceneY()-15);
+        			
+        			selectedNode = n;
+        			//System.out.println("drag enter");
+        			
         			break;
         		}
         	}
     		
     		wasDragging = true;
+    	});
+    	canvas.setOnMouseReleased(e->{
+    		selectedNode = null;
+    		//System.out.println("drag exit");
+    	});
+    	canvas.setOnMouseDragged(e->{
+    		if(selectedNode != null){
+	    		selectedNode.setX(e.getSceneX()-15);
+	    		selectedNode.setY(e.getSceneY()-15);
+    		}
     	});
     	canvas.setOnMouseClicked(e->{
     		
@@ -138,45 +153,71 @@ public class GraphToolDriver extends Application {
 	    		}
     		}
     		
-    		// Create node
+    		// Node addition
     		else if(e.getButton() == MouseButton.SECONDARY){
     			GraphNode node = new GraphNode(e.getSceneX()-15, e.getSceneY()-15);
     			graphNodes.add(node);
     		}
     	});
+    	
     	s.setOnKeyPressed(e->{
+    		
+    		// Edge addition
     		if(e.getCode() == KeyCode.N){
     			if(selectedNodes.size() == 2){
     				selectedNodes.get(0).neighbors.add(selectedNodes.get(1));
+    				Deselect();
     			}
     		}
+    		
+    		// Edge deletion
     		else if(e.getCode() == KeyCode.D){
     			if(selectedNodes.size() == 2){
     				if(selectedNodes.get(0).neighbors.contains(selectedNodes.get(1))){
     					selectedNodes.get(0).neighbors.remove(selectedNodes.get(1));
+    					Deselect();
     					
     				}
     				else if(selectedNodes.get(1).neighbors.contains(selectedNodes.get(0))){
     					selectedNodes.get(1).neighbors.remove(selectedNodes.get(0));
-    					
+    					Deselect();
     				}
     			}
     		}
     		else if(e.getCode() == KeyCode.A){
-    			if(selectedNodes.size() == 2){
-    				selectedNodes.get(0).selected = false;
-    				selectedNodes.get(1).selected = false;
-    				selectedNodes.clear();
-    			}
+    			Deselect();
 			}
+    		
+    		// Node deletion
+    		else if(e.getCode() == KeyCode.DELETE){
+    			for(int i=0; i<graphNodes.size(); i++){
+    				
+    				GraphNode n = graphNodes.get(i);
+    				
+    				if(n.selected){
+    					graphNodes.remove(n);
+    					for(GraphNode node : graphNodes){
+    						for(int j=0; j<node.neighbors.size(); j++){
+    							if(node.neighbors.get(j) == n){
+    								node.neighbors.remove(j);
+    								j--;
+    							}
+        					}
+    					}
+    					n = null;
+    					i--;
+    				}
+    			}
+    		}
+    		
     	});
-    	
     	
     	gc = canvas.getGraphicsContext2D();
     	root.getChildren().add(canvas);
     	
         pStage.setScene(s);
         pStage.setTitle("Dilhan");
+        pStage.setResizable(false);
         pStage.show();
     }
     
@@ -194,5 +235,12 @@ public class GraphToolDriver extends Application {
     	double[] res = {midX+w, midY+h};
     	
     	return res;
+    }
+    
+    void Deselect(){
+    	for(int i=0; i<selectedNodes.size(); i++){
+			selectedNodes.get(i).selected = false;
+		}
+		selectedNodes.clear();
     }
 }
