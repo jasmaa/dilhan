@@ -7,24 +7,30 @@ import java.util.List;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.canvas.*;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.VBox;
 
 public class GraphToolDriver extends Application {
 	Canvas canvas;
 	GraphicsContext gc;
+	Label infoLabel = new Label();
+	
 	List<GraphNode> graphNodes;
-	
-	
 	boolean wasDragging;
 	GraphNode selectedNode;
 	List<GraphNode> selectedNodes = new ArrayList<GraphNode>();
+	
+	int numEdges;
+	int numVerts;
 	
 	public static void main(String[] args) {
         launch(args);
@@ -33,7 +39,7 @@ public class GraphToolDriver extends Application {
     @Override
     public void start(Stage pStage) {
         
-    	Group root = new Group();
+    	VBox root = new VBox();
     	Scene s = new Scene(root, 800, 800, Color.GRAY);
     	
     	GraphNode node1 = new GraphNode(0, 0);
@@ -54,7 +60,10 @@ public class GraphToolDriver extends Application {
                 new KeyFrame(Duration.millis(1),e->{
                 	
                 	gc.clearRect(0, 0, 800, 800);
-            		
+                	
+                	gc.setFill(Color.GRAY);
+                	gc.fillRect(0, 0, 800, 800);
+                	
                 	// Draw edges
                 	gc.setStroke(Color.TURQUOISE);
                 	gc.setLineWidth(3);
@@ -93,11 +102,22 @@ public class GraphToolDriver extends Application {
                 		gc.fillOval(n.getX(), n.getY(), 30, 30);
                 		
                 	}
+                	
+                	// Calculate info
+                	numVerts = graphNodes.size();
+                	numEdges = 0;
+                	for(GraphNode n : graphNodes){
+                		numEdges += n.neighbors.size();
+                	}
+                	
+                	infoLabel.setText(	"Vertices: " + numVerts +
+                						"\tEdges: " + numEdges);
+                	
                 }));
         timeline.playFromStart();
 		
 		// Set up canvas
-    	canvas = new Canvas(800,800);
+    	canvas = new Canvas(800,600);
     	
     	// Canvas events
     	canvas.setOnDragDetected(e->{
@@ -137,7 +157,7 @@ public class GraphToolDriver extends Application {
 	        			if(n.selected){
 	        				n.selected = false;
 	        			}
-	        			else if(selectedNodes.size() < 2){
+	        			else{
 	        				n.selected = true;
 	        			}
 	        			break;
@@ -163,10 +183,10 @@ public class GraphToolDriver extends Application {
     	s.setOnKeyPressed(e->{
     		
     		// Edge addition
-    		if(e.getCode() == KeyCode.N){
+    		if(e.getCode() == KeyCode.F){
     			if(selectedNodes.size() == 2){
     				selectedNodes.get(0).neighbors.add(selectedNodes.get(1));
-    				Deselect();
+    				DeselectAll();
     			}
     		}
     		
@@ -175,17 +195,22 @@ public class GraphToolDriver extends Application {
     			if(selectedNodes.size() == 2){
     				if(selectedNodes.get(0).neighbors.contains(selectedNodes.get(1))){
     					selectedNodes.get(0).neighbors.remove(selectedNodes.get(1));
-    					Deselect();
+    					DeselectAll();
     					
     				}
     				else if(selectedNodes.get(1).neighbors.contains(selectedNodes.get(0))){
     					selectedNodes.get(1).neighbors.remove(selectedNodes.get(0));
-    					Deselect();
+    					DeselectAll();
     				}
     			}
     		}
     		else if(e.getCode() == KeyCode.A){
-    			Deselect();
+    			if(selectedNodes.size() < graphNodes.size()){
+    				SelectAll();
+    			}
+    			else{
+    				DeselectAll();
+    			}
 			}
     		
     		// Node deletion
@@ -214,6 +239,8 @@ public class GraphToolDriver extends Application {
     	
     	gc = canvas.getGraphicsContext2D();
     	root.getChildren().add(canvas);
+    	root.getChildren().add(infoLabel);
+    	root.setAlignment(Pos.BASELINE_CENTER);
     	
         pStage.setScene(s);
         pStage.setTitle("Dilhan");
@@ -237,10 +264,16 @@ public class GraphToolDriver extends Application {
     	return res;
     }
     
-    void Deselect(){
+    void DeselectAll(){
     	for(int i=0; i<selectedNodes.size(); i++){
 			selectedNodes.get(i).selected = false;
 		}
 		selectedNodes.clear();
+    }
+    void SelectAll(){
+    	for(int i=0; i<graphNodes.size(); i++){
+    		graphNodes.get(i).selected = true;
+    		selectedNodes.add(graphNodes.get(i));
+		}
     }
 }
