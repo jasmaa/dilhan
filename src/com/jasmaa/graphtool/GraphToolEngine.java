@@ -3,6 +3,7 @@ package com.jasmaa.graphtool;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -25,12 +26,13 @@ enum EditorState{
 	IDLE;
 }
 
-public class GraphToolDriver extends Application {
+public class GraphToolEngine extends Application {
 	Canvas canvas;
 	GraphicsContext gc;
 	Label infoLabel = new Label();
 	
 	List<GraphNode> graphNodes;
+	List<GraphEdge> graphEdges;
 	List<GraphNode> selectedNodes = new ArrayList<GraphNode>();
 	GraphNode selectedNode;
 	double oldXPos;
@@ -43,6 +45,7 @@ public class GraphToolDriver extends Application {
 	
 	public static void main(String[] args) {
         launch(args);
+        
     }
     
     @Override
@@ -61,6 +64,8 @@ public class GraphToolDriver extends Application {
 		graphNodes.add(node2);
 		graphNodes.add(node3);
 		graphNodes.add(node4);
+		
+		graphEdges = new ArrayList<GraphEdge>();
     	
 		// Update screen
 		Timeline timeline = new Timeline();
@@ -76,28 +81,25 @@ public class GraphToolDriver extends Application {
                 	// Draw edges
                 	gc.setStroke(Color.TURQUOISE);
                 	gc.setLineWidth(3);
-                	for(GraphNode n : graphNodes){
-                		Collections.sort(n.neighbors);
-                		int counter = 0;
+                	Collections.sort(graphEdges);
+                	int counter = 0;
+                	for(int i=0; i<graphEdges.size(); i++){
                 		
-                		for(int i=0; i<n.neighbors.size(); i++){
-                			
-                			GraphNode neighbor = n.neighbors.get(i);
-                			
-                			if(i >= 1 && n.neighbors.get(i-1) == n.neighbors.get(i)){
-                				counter++;
-                			}
-                			else{
-                				counter = 0;
-                			}
-                			
-                			gc.beginPath();
-                			gc.moveTo(n.x+15, n.y+15);
-                			double[] controlPt = CalcControlPt(n.x+15, n.y+15, neighbor.x+15, neighbor.y+15, counter);
-                			gc.quadraticCurveTo(controlPt[0], controlPt[1], neighbor.x+15, neighbor.y+15);
-                			
-                			gc.stroke();
+                		if(i > 0 && graphEdges.get(i-1).hashCode() == graphEdges.get(i).hashCode()){
+                			counter++;
                 		}
+                		else{
+                			counter = 0;
+                		}
+                		
+                		GraphEdge edge = graphEdges.get(i);
+                		
+                		gc.beginPath();
+            			gc.moveTo(edge.node1.x+15, edge.node1.y+15);
+            			double[] controlPt = CalcControlPt(edge.node1.x+15, edge.node1.y+15, edge.node2.x+15, edge.node2.y+15, counter);
+            			gc.quadraticCurveTo(controlPt[0], controlPt[1], edge.node2.x+15, edge.node2.y+15);
+            			
+            			gc.stroke();
                 	}
                 	
                 	// Draw nodes
@@ -211,22 +213,25 @@ public class GraphToolDriver extends Application {
     		if(e.getCode() == KeyCode.F){
     			if(selectedNodes.size() == 2){
     				selectedNodes.get(0).neighbors.add(selectedNodes.get(1));
+    				selectedNodes.get(1).neighbors.add(selectedNodes.get(0));
+    				
+    				graphEdges.add(new GraphEdge(selectedNodes.get(0), selectedNodes.get(1)));
+    				
     				DeselectAll();
     			}
     		}
     		
+    		// CURRENTLY BROKEN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
     		// Edge deletion
     		else if(e.getCode() == KeyCode.D){
     			if(selectedNodes.size() == 2){
     				if(selectedNodes.get(0).neighbors.contains(selectedNodes.get(1))){
     					selectedNodes.get(0).neighbors.remove(selectedNodes.get(1));
-    					DeselectAll();
-    					
     				}
-    				else if(selectedNodes.get(1).neighbors.contains(selectedNodes.get(0))){
+    				if(selectedNodes.get(1).neighbors.contains(selectedNodes.get(0))){
     					selectedNodes.get(1).neighbors.remove(selectedNodes.get(0));
-    					DeselectAll();
     				}
+    				DeselectAll();
     			}
     		}
     		
