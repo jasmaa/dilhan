@@ -19,18 +19,27 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 
+enum EditorState{
+	DRAGGING,
+	GRABBING,
+	IDLE;
+}
+
 public class GraphToolDriver extends Application {
 	Canvas canvas;
 	GraphicsContext gc;
 	Label infoLabel = new Label();
 	
 	List<GraphNode> graphNodes;
-	boolean wasDragging;
-	GraphNode selectedNode;
 	List<GraphNode> selectedNodes = new ArrayList<GraphNode>();
+	GraphNode selectedNode;
+	double oldXPos;
+	double oldYPos;
 	
 	int numEdges;
 	int numVerts;
+	
+	EditorState state;
 	
 	public static void main(String[] args) {
         launch(args);
@@ -131,7 +140,7 @@ public class GraphToolDriver extends Application {
         		}
         	}
     		
-    		wasDragging = true;
+    		state = EditorState.DRAGGING;
     	});
     	canvas.setOnMouseReleased(e->{
     		selectedNode = null;
@@ -145,8 +154,11 @@ public class GraphToolDriver extends Application {
     	});
     	canvas.setOnMouseClicked(e->{
     		
-    		if(wasDragging){
-    			wasDragging = false;
+    		if(state != EditorState.IDLE){
+    			if(state == EditorState.GRABBING){
+    				DeselectAll();
+    			}
+    			state = EditorState.IDLE;
     			return;
     		}
     		
@@ -179,6 +191,19 @@ public class GraphToolDriver extends Application {
     			graphNodes.add(node);
     		}
     	});
+    	canvas.setOnMouseMoved(e->{
+    		
+    		// Do Grab
+    		if(state == EditorState.GRABBING){
+	    		for(GraphNode n : selectedNodes){
+	    			n.x += e.getSceneX() - oldXPos;
+	    			n.y += e.getSceneY() - oldYPos;
+	    		}
+    		}
+    		
+    		oldXPos = e.getSceneX();
+    		oldYPos = e.getSceneY();
+    	});
     	
     	s.setOnKeyPressed(e->{
     		
@@ -204,6 +229,8 @@ public class GraphToolDriver extends Application {
     				}
     			}
     		}
+    		
+    		// Select all
     		else if(e.getCode() == KeyCode.A){
     			if(selectedNodes.size() < graphNodes.size()){
     				SelectAll();
@@ -233,6 +260,11 @@ public class GraphToolDriver extends Application {
     					i--;
     				}
     			}
+    		}
+    		
+    		// Activate Grab
+    		else if(e.getCode() == KeyCode.G){
+    			state = EditorState.GRABBING;
     		}
     		
     	});
