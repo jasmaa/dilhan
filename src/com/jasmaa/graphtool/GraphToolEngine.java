@@ -116,10 +116,7 @@ public class GraphToolEngine extends Application {
                 	
                 	// Calculate info
                 	numVerts = graphNodes.size();
-                	numEdges = 0;
-                	for(GraphNode n : graphNodes){
-                		numEdges += n.neighbors.size();
-                	}
+                	numEdges = graphEdges.size();
                 	
                 	infoLabel.setText(	"Vertices: " + numVerts +
                 						"\tEdges: " + numEdges);
@@ -221,7 +218,6 @@ public class GraphToolEngine extends Application {
     			}
     		}
     		
-    		// CURRENTLY BROKEN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
     		// Edge deletion
     		else if(e.getCode() == KeyCode.D){
     			if(selectedNodes.size() == 2){
@@ -231,6 +227,16 @@ public class GraphToolEngine extends Application {
     				if(selectedNodes.get(1).neighbors.contains(selectedNodes.get(0))){
     					selectedNodes.get(1).neighbors.remove(selectedNodes.get(0));
     				}
+    				
+    				// Add edge deletion here
+    				GraphEdge testEdge = new GraphEdge(selectedNodes.get(0), selectedNodes.get(1));
+    				for (GraphEdge edge : graphEdges){
+    					if(testEdge.hashCode() == edge.hashCode()){
+    						graphEdges.remove(edge);
+    						break;
+    					}
+    				}
+    				
     				DeselectAll();
     			}
     		}
@@ -253,6 +259,7 @@ public class GraphToolEngine extends Application {
     				
     				if(n.selected){
     					graphNodes.remove(n);
+    					
     					for(GraphNode node : graphNodes){
     						for(int j=0; j<node.neighbors.size(); j++){
     							if(node.neighbors.get(j) == n){
@@ -261,9 +268,18 @@ public class GraphToolEngine extends Application {
     							}
         					}
     					}
-    					n = null;
+    					
+    					for(int j=0; j<graphEdges.size(); j++){
+    						GraphEdge edge = graphEdges.get(j);
+    						if(edge.contains(n)){
+    							graphEdges.remove(edge);
+    							j--;
+    						}
+    					}
+    					
     					i--;
     				}
+
     			}
     		}
     		

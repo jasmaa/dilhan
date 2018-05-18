@@ -16,6 +16,10 @@ public class GraphEdge implements Comparable<GraphEdge> {
 		return node1==e.node1 && node2==e.node2 ||  node2==e.node1 && node1==e.node2;
 	}
 
+	public boolean contains(GraphNode n){
+		return node1 == n || node2 == n;
+	}
+	
 	@Override
 	public int hashCode(){
 		return Objects.hash(node1) + Objects.hash(node2);
