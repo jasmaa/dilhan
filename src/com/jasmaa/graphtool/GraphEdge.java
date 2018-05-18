@@ -1,8 +1,15 @@
 package com.jasmaa.graphtool;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class GraphEdge implements Comparable<GraphEdge> {
+/**
+ * Stores edge info
+ * 
+ * @author Jason Maa
+ *
+ */
+public class GraphEdge implements Comparable<GraphEdge>, Serializable {
 	
 	GraphNode node1;
 	GraphNode node2;

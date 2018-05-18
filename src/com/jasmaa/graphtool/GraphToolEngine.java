@@ -1,20 +1,24 @@
 package com.jasmaa.graphtool;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.scene.canvas.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -26,10 +30,18 @@ enum EditorState{
 	IDLE;
 }
 
+/**
+ * Main engine running graphing functionality
+ * 
+ * @author Jason Maa
+ *
+ */
 public class GraphToolEngine extends Application {
 	Canvas canvas;
 	GraphicsContext gc;
 	Label infoLabel = new Label();
+	Button saveBut = new Button("Save");
+	Button loadBut = new Button("Load");
 	
 	List<GraphNode> graphNodes;
 	List<GraphEdge> graphEdges;
@@ -130,7 +142,7 @@ public class GraphToolEngine extends Application {
     	// Canvas events
     	canvas.setOnDragDetected(e->{
     		for(GraphNode n : graphNodes){
-        		if(Math.abs(e.getSceneX()-15-n.getX()) < 15 && Math.abs(e.getSceneY()-15-n.getY()) < 15){
+        		if(Math.abs(e.getSceneX()-15-n.getX()) < 30 && Math.abs(e.getSceneY()-15-n.getY()) < 30){
         			
         			selectedNode = n;
         			//System.out.println("drag enter");
@@ -164,7 +176,7 @@ public class GraphToolEngine extends Application {
     		// Select node
     		if(e.getButton() == MouseButton.PRIMARY){
 	    		for(GraphNode n : graphNodes){
-	        		if(Math.abs(e.getSceneX()-15-n.getX()) < 15 && Math.abs(e.getSceneY()-15-n.getY()) < 15){
+	        		if(Math.abs(e.getSceneX()-15-n.getX()) < 30 && Math.abs(e.getSceneY()-15-n.getY()) < 30){
 	        			if(n.selected){
 	        				n.selected = false;
 	        			}
@@ -290,9 +302,17 @@ public class GraphToolEngine extends Application {
     		
     	});
     	
+    	// Button cmds
+    	saveBut.setOnAction(e->{
+    		Save();
+    	});
+    	loadBut.setOnAction(e->{
+    		Load();
+    	});
+    	
     	gc = canvas.getGraphicsContext2D();
     	root.getChildren().add(canvas);
-    	root.getChildren().add(infoLabel);
+    	root.getChildren().addAll(infoLabel, saveBut, loadBut);
     	root.setAlignment(Pos.BASELINE_CENTER);
     	
         pStage.setScene(s);
@@ -328,5 +348,61 @@ public class GraphToolEngine extends Application {
     		graphNodes.get(i).selected = true;
     		selectedNodes.add(graphNodes.get(i));
 		}
+    }
+    
+    void Save(){
+    	
+    	FileOutputStream fileOut;
+    	ObjectOutputStream out;
+    	
+    	try {
+            fileOut = new FileOutputStream("/tmp/graphNodes.ser");
+            out = new ObjectOutputStream(fileOut);
+            out.writeObject(graphNodes);
+            out.close();
+            fileOut.close();
+            System.out.printf("Saved graph nodes");
+         } catch (IOException i) {
+            i.printStackTrace();
+         }
+    }
+    void Load(){
+    	
+    	FileInputStream fileIn;
+    	ObjectInputStream in;
+    	
+    	try {
+            fileIn = new FileInputStream("/tmp/graphNodes.ser");
+            in = new ObjectInputStream(fileIn);
+            graphNodes = (List<GraphNode>) in.readObject();
+            in.close();
+            fileIn.close();
+         } catch (IOException i) {
+            i.printStackTrace();
+            return;
+         } catch (ClassNotFoundException c) {
+            System.out.println("Class not found");
+            c.printStackTrace();
+            return;
+         }
+    	
+    	// Build edges from adjacency
+    	// MAKE ME BETTER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    	graphEdges.clear();
+    	for(GraphNode n : graphNodes){
+    		for(GraphNode neighbor : n.neighbors){
+    			GraphEdge edge = new GraphEdge(n, neighbor);
+    			
+    			boolean alreadyIn = false;
+    			for(int i=0; i<graphEdges.size(); i++){
+    				if(graphEdges.get(i).hashCode() == edge.hashCode()){
+    					alreadyIn = true;
+    				}
+    			}
+    			if(!alreadyIn){
+    				graphEdges.add(edge);
+    			}
+    		}
+    	}
     }
 }

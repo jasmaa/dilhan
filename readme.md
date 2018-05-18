@@ -9,7 +9,5 @@ Tool for creating and analyzing undirected graphs
 ## TODO
   - Compute shortest path between two selected points
   - Optimize graphical performance
-  - Make group of vertices draggable
-  - Fix neighbor tracking and edge drawing
-    - Make edges obj?
   - Saving and loading
+  - Split engine and driver

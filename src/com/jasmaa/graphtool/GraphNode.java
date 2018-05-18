@@ -1,10 +1,17 @@
 package com.jasmaa.graphtool;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class GraphNode implements Comparable<GraphNode>{
+/**
+ * Stores node info
+ * 
+ * @author Jason Maa
+ *
+ */
+public class GraphNode implements Comparable<GraphNode>, Serializable{
 	
 	double x;
 	double y;
