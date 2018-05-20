@@ -9,5 +9,3 @@ Tool for creating and analyzing undirected graphs
 ## TODO
   - Compute shortest path between two selected points
   - Optimize graphical performance
-  - Saving and loading
-  - Split engine and driver
