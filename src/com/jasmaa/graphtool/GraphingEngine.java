@@ -15,10 +15,8 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-enum EditorState{
-	DRAGGING,
-	GRABBING,
-	IDLE;
+enum EditorState {
+	DRAGGING, GRABBING, IDLE;
 }
 
 /**
@@ -29,267 +27,294 @@ enum EditorState{
  */
 public class GraphingEngine {
 	EditorState state;
-	
+
 	List<GraphNode> graphNodes;
 	List<GraphEdge> graphEdges;
-	
+
 	List<GraphNode> selectedNodes = new ArrayList<GraphNode>();
 	GraphNode selectedNode;
 	double oldXPos;
 	double oldYPos;
-	
+
 	int numEdges;
 	int numVerts;
-	
-	public GraphingEngine(){
+
+	File currentFile;
+
+	public GraphingEngine() {
 		graphNodes = new ArrayList<GraphNode>();
 		graphEdges = new ArrayList<GraphEdge>();
 	}
-	
-	public void InitDrag(double x, double y){
-		for(GraphNode n : graphNodes){
-    		if(Math.abs(x-15-n.getX()) < 30 && Math.abs(y-15-n.getY()) < 30){
-    			selectedNode = n;
-    			break;
-    		}
-    	}
-		
+
+	public void InitDrag(double x, double y) {
+		for (GraphNode n : graphNodes) {
+			if (Math.abs(x - 15 - n.getX()) < 30 && Math.abs(y - 45 - n.getY()) < 30) {
+				selectedNode = n;
+				break;
+			}
+		}
+
 		state = EditorState.DRAGGING;
 	}
-	public void EndDrag(){
+
+	public void EndDrag() {
 		selectedNode = null;
-		//System.out.println("drag exit");
+		// System.out.println("drag exit");
 	}
-	public void Drag(double x, double y){
-		if(selectedNode != null){
-    		selectedNode.setX(x-15);
-    		selectedNode.setY(y-15);
+
+	public void Drag(double x, double y) {
+		if (selectedNode != null) {
+			selectedNode.setX(x - 15);
+			selectedNode.setY(y - 45);
 		}
 	}
-	public void MouseClick(MouseButton button, double x, double y){
-		if(state != EditorState.IDLE){
-			if(state == EditorState.GRABBING){
+
+	public void MouseClick(MouseButton button, double x, double y) {
+		if (state != EditorState.IDLE) {
+			if (state == EditorState.GRABBING) {
 				DeselectAll();
 			}
 			state = EditorState.IDLE;
 			return;
 		}
-		
+
 		// Select node
-		if(button == MouseButton.PRIMARY){
-    		for(GraphNode n : graphNodes){
-        		if(Math.abs(x-15-n.getX()) < 30 && Math.abs(y-15-n.getY()) < 30){
-        			if(n.selected){
-        				n.selected = false;
-        			}
-        			else{
-        				n.selected = true;
-        			}
-        			break;
-        		}
-        	}
-    		
-    		// count selected
-    		selectedNodes.clear();
-    		for(GraphNode n : graphNodes){
-    			if(n.selected){
-    				selectedNodes.add(n);
-    			}
-    		}
+		if (button == MouseButton.PRIMARY) {
+			for (GraphNode n : graphNodes) {
+				if (Math.abs(x - 15 - n.getX()) < 30 && Math.abs(y - 45 - n.getY()) < 30) {
+					if (n.selected) {
+						n.selected = false;
+					} else {
+						n.selected = true;
+					}
+					break;
+				}
+			}
+
+			// count selected
+			selectedNodes.clear();
+			for (GraphNode n : graphNodes) {
+				if (n.selected) {
+					selectedNodes.add(n);
+				}
+			}
 		}
-		
+
 		// Node addition
-		else if(button == MouseButton.SECONDARY){
-			GraphNode node = new GraphNode(x-15, y-15);
+		else if (button == MouseButton.SECONDARY) {
+			GraphNode node = new GraphNode(x - 15, y - 45);
 			graphNodes.add(node);
 		}
 	}
-	public void MouseMove(double x, double y){
+
+	public void MouseMove(double x, double y) {
 		// Do Grab
-		if(state == EditorState.GRABBING){
-    		for(GraphNode n : selectedNodes){
-    			n.x += x - oldXPos;
-    			n.y += y - oldYPos;
-    		}
+		if (state == EditorState.GRABBING) {
+			for (GraphNode n : selectedNodes) {
+				n.x += x - oldXPos;
+				n.y += y - oldYPos;
+			}
 		}
-		
+
 		oldXPos = x;
 		oldYPos = y;
 	}
-	public void KeyPress(KeyCode code){
+
+	public void KeyPress(KeyCode code) {
 		// Edge addition
-		if(code == KeyCode.F){
-			if(selectedNodes.size() == 2){
+		if (code == KeyCode.F) {
+			if (selectedNodes.size() == 2) {
 				selectedNodes.get(0).neighbors.add(selectedNodes.get(1));
 				selectedNodes.get(1).neighbors.add(selectedNodes.get(0));
-				
+
 				graphEdges.add(new GraphEdge(selectedNodes.get(0), selectedNodes.get(1)));
-				
+
 				DeselectAll();
 			}
 		}
-		
+
 		// Edge deletion
-		else if(code == KeyCode.D){
-			if(selectedNodes.size() == 2){
-				if(selectedNodes.get(0).neighbors.contains(selectedNodes.get(1))){
+		else if (code == KeyCode.D) {
+			if (selectedNodes.size() == 2) {
+				if (selectedNodes.get(0).neighbors.contains(selectedNodes.get(1))) {
 					selectedNodes.get(0).neighbors.remove(selectedNodes.get(1));
 				}
-				if(selectedNodes.get(1).neighbors.contains(selectedNodes.get(0))){
+				if (selectedNodes.get(1).neighbors.contains(selectedNodes.get(0))) {
 					selectedNodes.get(1).neighbors.remove(selectedNodes.get(0));
 				}
-				
+
 				// Add edge deletion here
 				GraphEdge testEdge = new GraphEdge(selectedNodes.get(0), selectedNodes.get(1));
-				for (GraphEdge edge : graphEdges){
-					if(testEdge.hashCode() == edge.hashCode()){
+				for (GraphEdge edge : graphEdges) {
+					if (testEdge.hashCode() == edge.hashCode()) {
 						graphEdges.remove(edge);
 						break;
 					}
 				}
-				
+
 				DeselectAll();
 			}
 		}
-		
+
 		// Select all
-		else if(code == KeyCode.A){
-			if(selectedNodes.size() < graphNodes.size()){
+		else if (code == KeyCode.A) {
+			if (selectedNodes.size() < graphNodes.size()) {
 				SelectAll();
-			}
-			else{
+			} else {
 				DeselectAll();
 			}
 		}
-		
+
 		// Node deletion
-		else if(code == KeyCode.DELETE){
-			for(int i=0; i<graphNodes.size(); i++){
-				
+		else if (code == KeyCode.DELETE) {
+			for (int i = 0; i < graphNodes.size(); i++) {
+
 				GraphNode n = graphNodes.get(i);
-				
-				if(n.selected){
+
+				if (n.selected) {
 					graphNodes.remove(n);
-					
-					for(GraphNode node : graphNodes){
-						for(int j=0; j<node.neighbors.size(); j++){
-							if(node.neighbors.get(j) == n){
+
+					for (GraphNode node : graphNodes) {
+						for (int j = 0; j < node.neighbors.size(); j++) {
+							if (node.neighbors.get(j) == n) {
 								node.neighbors.remove(j);
 								j--;
 							}
-    					}
+						}
 					}
-					
-					for(int j=0; j<graphEdges.size(); j++){
+
+					for (int j = 0; j < graphEdges.size(); j++) {
 						GraphEdge edge = graphEdges.get(j);
-						if(edge.contains(n)){
+						if (edge.contains(n)) {
 							graphEdges.remove(edge);
 							j--;
 						}
 					}
-					
+
 					i--;
 				}
 
 			}
 		}
-		
+
 		// Activate Grab
-		else if(code == KeyCode.G){
+		else if (code == KeyCode.G) {
 			state = EditorState.GRABBING;
 		}
 	}
-	
-	public static double[] CalcControlPt(double x1, double y1, double x2, double y2, int n){
-    	double midX = (x1+x2)/2;
-    	double midY = (y1+y2)/2;
-    	double orthoSlope = -(x1-x2) / (y1-y2);
-    	
-    	double size = Math.pow(-1, n) * 30* ((n+1)/2);
-    	
-    	// preserve n length
-    	double w = size / Math.sqrt(1+Math.pow(orthoSlope, 2));
-    	double h = orthoSlope*w;
-    	
-    	double[] res = {midX+w, midY+h};
-    	
-    	return res;
-    }
-	
-	void DeselectAll(){
-    	for(int i=0; i<selectedNodes.size(); i++){
+
+	public static double[] CalcControlPt(double x1, double y1, double x2, double y2, int n) {
+		double midX = (x1 + x2) / 2;
+		double midY = (y1 + y2) / 2;
+		double orthoSlope = -(x1 - x2) / (y1 - y2);
+
+		double size = Math.pow(-1, n) * 30 * ((n + 1) / 2);
+
+		// preserve n length
+		double w = size / Math.sqrt(1 + Math.pow(orthoSlope, 2));
+		double h = orthoSlope * w;
+
+		double[] res = { midX + w, midY + h };
+
+		return res;
+	}
+
+	void DeselectAll() {
+		for (int i = 0; i < selectedNodes.size(); i++) {
 			selectedNodes.get(i).selected = false;
 		}
 		selectedNodes.clear();
-    }
-    void SelectAll(){
-    	for(int i=0; i<graphNodes.size(); i++){
-    		graphNodes.get(i).selected = true;
-    		selectedNodes.add(graphNodes.get(i));
+	}
+
+	void SelectAll() {
+		for (int i = 0; i < graphNodes.size(); i++) {
+			graphNodes.get(i).selected = true;
+			selectedNodes.add(graphNodes.get(i));
 		}
-    }
-	
-	void Save(Stage stage){
-    	
-    	FileOutputStream fileOut;
-    	ObjectOutputStream out;
-    	FileChooser fileChooser = new FileChooser();
-    	
-    	try {
-    		
-    		File file = fileChooser.showSaveDialog(stage);
-            if (file == null) {
-                return;
-            }
-    		
-            fileOut = new FileOutputStream(file);
-            out = new ObjectOutputStream(fileOut);
-            out.writeObject(graphNodes);
-            out.close();
-            fileOut.close();
-            System.out.printf("Saved graph nodes");
-         } catch (IOException i) {
-            i.printStackTrace();
-         }
-    }
-    void Load(Stage stage){
-    	
-    	FileInputStream fileIn;
-    	ObjectInputStream in;
-    	FileChooser fileChooser = new FileChooser();
-    	
-    	File file = fileChooser.showOpenDialog(stage);
-        if (file == null) {
-            return;
-        }
-    	
-    	try {
-            fileIn = new FileInputStream(file);
-            in = new ObjectInputStream(fileIn);
-            graphNodes = (List<GraphNode>) in.readObject();
-            in.close();
-            fileIn.close();
-         } catch (IOException i) {
-            i.printStackTrace();
-            return;
-         } catch (ClassNotFoundException c) {
-            System.out.println("Class not found");
-            c.printStackTrace();
-            return;
-         }
-    	
-    	// Build edges from adjacency
-    	graphEdges.clear();
-    	for(GraphNode n : graphNodes){
-    		for(GraphNode neighbor : n.neighbors){
-    			GraphEdge edge = new GraphEdge(n, neighbor);
-    			graphEdges.add(edge);
-    		}
-    	}
-    	// Delete repeated
-    	Collections.sort(graphEdges);
-    	for(int i=0; i<graphEdges.size(); i++){
-    		graphEdges.remove(i);
-    	}
-    }
+	}
+
+	void SaveAs(Stage stage) {
+		FileChooser fileChooser = new FileChooser();
+		File file = fileChooser.showSaveDialog(stage);
+		if (file == null) {
+			return;
+		}
+
+		SaveData(stage, file);
+	}
+
+	void Save(Stage stage) {
+		if (currentFile == null) {
+			SaveAs(stage);
+		} else {
+			SaveData(stage, currentFile);
+		}
+	}
+
+	void SaveData(Stage stage, File f) {
+
+		FileOutputStream fileOut;
+		ObjectOutputStream out;
+
+		currentFile = f;
+
+		try {
+
+			fileOut = new FileOutputStream(f);
+			out = new ObjectOutputStream(fileOut);
+			out.writeObject(graphNodes);
+			out.close();
+			fileOut.close();
+			System.out.printf("Saved graph nodes");
+		} catch (IOException i) {
+			i.printStackTrace();
+		}
+	}
+
+	void Load(Stage stage) {
+
+		FileInputStream fileIn;
+		ObjectInputStream in;
+		FileChooser fileChooser = new FileChooser();
+
+		File file = fileChooser.showOpenDialog(stage);
+		if (file == null) {
+			return;
+		}
+
+		currentFile = file;
+
+		try {
+			fileIn = new FileInputStream(file);
+			in = new ObjectInputStream(fileIn);
+			graphNodes = (List<GraphNode>) in.readObject();
+			in.close();
+			fileIn.close();
+		} catch (IOException i) {
+			i.printStackTrace();
+			return;
+		} catch (ClassNotFoundException c) {
+			System.out.println("Class not found");
+			c.printStackTrace();
+			return;
+		}
+
+		for (GraphNode n : graphNodes) {
+			n.selected = false;
+		}
+
+		// Build edges from adjacency
+		graphEdges.clear();
+		for (GraphNode n : graphNodes) {
+			for (GraphNode neighbor : n.neighbors) {
+				GraphEdge edge = new GraphEdge(n, neighbor);
+				graphEdges.add(edge);
+			}
+		}
+		// Delete repeated
+		Collections.sort(graphEdges);
+		for (int i = 0; i < graphEdges.size(); i++) {
+			graphEdges.remove(i);
+		}
+	}
 }
