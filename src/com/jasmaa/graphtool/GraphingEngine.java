@@ -1,15 +1,19 @@
 package com.jasmaa.graphtool;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 enum EditorState{
 	DRAGGING,
@@ -196,7 +200,7 @@ public class GraphingEngine {
 		}
 	}
 	
-	double[] CalcControlPt(double x1, double y1, double x2, double y2, int n){
+	public static double[] CalcControlPt(double x1, double y1, double x2, double y2, int n){
     	double midX = (x1+x2)/2;
     	double midY = (y1+y2)/2;
     	double orthoSlope = -(x1-x2) / (y1-y2);
@@ -225,13 +229,20 @@ public class GraphingEngine {
 		}
     }
 	
-	void Save(){
+	void Save(Stage stage){
     	
     	FileOutputStream fileOut;
     	ObjectOutputStream out;
+    	FileChooser fileChooser = new FileChooser();
     	
     	try {
-            fileOut = new FileOutputStream("/tmp/graphNodes.ser");
+    		
+    		File file = fileChooser.showSaveDialog(stage);
+            if (file == null) {
+                return;
+            }
+    		
+            fileOut = new FileOutputStream(file);
             out = new ObjectOutputStream(fileOut);
             out.writeObject(graphNodes);
             out.close();
@@ -241,13 +252,19 @@ public class GraphingEngine {
             i.printStackTrace();
          }
     }
-    void Load(){
+    void Load(Stage stage){
     	
     	FileInputStream fileIn;
     	ObjectInputStream in;
+    	FileChooser fileChooser = new FileChooser();
+    	
+    	File file = fileChooser.showOpenDialog(stage);
+        if (file == null) {
+            return;
+        }
     	
     	try {
-            fileIn = new FileInputStream("/tmp/graphNodes.ser");
+            fileIn = new FileInputStream(file);
             in = new ObjectInputStream(fileIn);
             graphNodes = (List<GraphNode>) in.readObject();
             in.close();
@@ -262,22 +279,17 @@ public class GraphingEngine {
          }
     	
     	// Build edges from adjacency
-    	// USE A SET!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     	graphEdges.clear();
     	for(GraphNode n : graphNodes){
     		for(GraphNode neighbor : n.neighbors){
     			GraphEdge edge = new GraphEdge(n, neighbor);
-    			
-    			boolean alreadyIn = false;
-    			for(int i=0; i<graphEdges.size(); i++){
-    				if(graphEdges.get(i).hashCode() == edge.hashCode()){
-    					alreadyIn = true;
-    				}
-    			}
-    			if(!alreadyIn){
-    				graphEdges.add(edge);
-    			}
+    			graphEdges.add(edge);
     		}
+    	}
+    	// Delete repeated
+    	Collections.sort(graphEdges);
+    	for(int i=0; i<graphEdges.size(); i++){
+    		graphEdges.remove(i);
     	}
     }
 }

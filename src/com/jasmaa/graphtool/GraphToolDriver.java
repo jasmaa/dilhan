@@ -82,7 +82,7 @@ public class GraphToolDriver extends Application {
                 		
                 		gc.beginPath();
             			gc.moveTo(edge.node1.x+15, edge.node1.y+15);
-            			double[] controlPt = engine.CalcControlPt(edge.node1.x+15, edge.node1.y+15, edge.node2.x+15, edge.node2.y+15, counter);
+            			double[] controlPt = GraphingEngine.CalcControlPt(edge.node1.x+15, edge.node1.y+15, edge.node2.x+15, edge.node2.y+15, counter);
             			gc.quadraticCurveTo(controlPt[0], controlPt[1], edge.node2.x+15, edge.node2.y+15);
             			
             			gc.stroke();
@@ -133,10 +133,10 @@ public class GraphToolDriver extends Application {
     	
     	// Button cmds
     	saveBut.setOnAction(e->{
-    		engine.Save();
+    		engine.Save(pStage);
     	});
     	loadBut.setOnAction(e->{
-    		engine.Load();
+    		engine.Load(pStage);
     	});
     	
     	gc = canvas.getGraphicsContext2D();
