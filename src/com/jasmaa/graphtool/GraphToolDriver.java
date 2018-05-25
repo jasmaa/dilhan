@@ -28,6 +28,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToolBar;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
@@ -151,6 +152,7 @@ public class GraphToolDriver extends Application {
         pStage.setScene(s);
         pStage.setTitle(name);
         pStage.setResizable(false);
+        pStage.getIcons().add(new Image("logo.png"));
         pStage.show();
     }
     

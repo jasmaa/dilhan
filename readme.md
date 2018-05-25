@@ -1,11 +1,8 @@
 # Dilhan
 
-Tool for creating and analyzing undirected graphs
+Dilhan is a tool for creating and analyzing undirected graphs
 
 ## Features
-  - Add/Delete vertices and edges
-  - Tracks edge and vertex count
-
-## TODO
-  - Compute shortest path between two selected points
-  - Optimize graphical performance
+  - Create and modify undirected graphs
+  - Save and load graph files
+  - Count vertices and edges
