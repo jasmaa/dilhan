@@ -13,6 +13,7 @@ import java.util.List;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 enum EditorState {
@@ -235,6 +236,7 @@ public class GraphingEngine {
 
 	void SaveAs(Stage stage) {
 		FileChooser fileChooser = new FileChooser();
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("DLH", "*.dlh"));
 		File file = fileChooser.showSaveDialog(stage);
 		if (file == null) {
 			return;
@@ -276,7 +278,8 @@ public class GraphingEngine {
 		FileInputStream fileIn;
 		ObjectInputStream in;
 		FileChooser fileChooser = new FileChooser();
-
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("DLH", "*.dlh"));
+		
 		File file = fileChooser.showOpenDialog(stage);
 		if (file == null) {
 			return;
