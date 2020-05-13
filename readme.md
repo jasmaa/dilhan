@@ -1,6 +1,6 @@
 # Dilhan
 
-![Logo](docs/screenshot_01.png)
+<img src="docs/screenshot_01.png" width="600">
 
 Dilhan is a tool for creating and analyzing undirected graphs.
 
