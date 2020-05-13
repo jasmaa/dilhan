@@ -6,6 +6,9 @@ function createWindow() {
     win = new BrowserWindow({
         height: 600,
         width: 800,
+        webPreferences: {
+            webSecurity: false
+        },
     });
 
     win.loadFile('index.html');

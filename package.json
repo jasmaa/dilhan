@@ -7,12 +7,15 @@
   "license": "MIT",
   "scripts": {
     "build": "node_modules/.bin/webpack",
-    "start": "yarn build && electron ./dist/main.js"
+    "start": "yarn build && electron ./dist/main.js",
+    "deploy": "yarn build && electron-packager ./dist dilhan platform=win32 --overwrite"
   },
   "dependencies": {},
   "devDependencies": {
+    "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.5.3",
     "electron": "^8.2.5",
+    "electron-packager": "^14.2.1",
     "html-webpack-plugin": "^4.3.0",
     "style-loader": "^1.2.1",
     "ts-loader": "^7.0.4",
