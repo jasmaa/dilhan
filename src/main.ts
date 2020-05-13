@@ -1,14 +1,20 @@
 import { app, BrowserWindow } from 'electron';
-import * as path from 'path';
 
 let win: Electron.BrowserWindow;
 
 app.on('ready', () => {
+
     win = new BrowserWindow({
         height: 600,
         width: 800,
     });
-    win.loadFile(path.join(__dirname, "../index.html"));
+    
+    win.loadFile('index.html');
 
+    // open dev tools for now
     win.webContents.openDevTools();
+
+    win.on('closed', () => {
+        app.quit();
+    });
 });
