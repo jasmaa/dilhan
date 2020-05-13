@@ -47,7 +47,7 @@ public class GraphingEngine {
 		graphEdges = new ArrayList<GraphEdge>();
 	}
 
-	public void InitDrag(double x, double y) {
+	public void initDrag(double x, double y) {
 		for (GraphNode n : graphNodes) {
 			if (Math.abs(x - 15 - n.getX()) < 30 && Math.abs(y - 45 - n.getY()) < 30) {
 				selectedNode = n;
@@ -58,22 +58,22 @@ public class GraphingEngine {
 		state = EditorState.DRAGGING;
 	}
 
-	public void EndDrag() {
+	public void endDrag() {
 		selectedNode = null;
 		// System.out.println("drag exit");
 	}
 
-	public void Drag(double x, double y) {
+	public void drag(double x, double y) {
 		if (selectedNode != null) {
 			selectedNode.setX(x - 15);
 			selectedNode.setY(y - 45);
 		}
 	}
 
-	public void MouseClick(MouseButton button, double x, double y) {
+	public void mouseClick(MouseButton button, double x, double y) {
 		if (state != EditorState.IDLE) {
 			if (state == EditorState.GRABBING) {
-				DeselectAll();
+				deselectAll();
 			}
 			state = EditorState.IDLE;
 			return;
@@ -108,7 +108,7 @@ public class GraphingEngine {
 		}
 	}
 
-	public void MouseMove(double x, double y) {
+	public void mouseMove(double x, double y) {
 		// Do Grab
 		if (state == EditorState.GRABBING) {
 			for (GraphNode n : selectedNodes) {
@@ -121,7 +121,7 @@ public class GraphingEngine {
 		oldYPos = y;
 	}
 
-	public void KeyPress(KeyCode code) {
+	public void keyPress(KeyCode code) {
 		// Edge addition
 		if (code == KeyCode.F) {
 			if (selectedNodes.size() == 2) {
@@ -130,7 +130,7 @@ public class GraphingEngine {
 
 				graphEdges.add(new GraphEdge(selectedNodes.get(0), selectedNodes.get(1)));
 
-				DeselectAll();
+				deselectAll();
 			}
 		}
 
@@ -153,16 +153,16 @@ public class GraphingEngine {
 					}
 				}
 
-				DeselectAll();
+				deselectAll();
 			}
 		}
 
 		// Select all
 		else if (code == KeyCode.A) {
 			if (selectedNodes.size() < graphNodes.size()) {
-				SelectAll();
+				selectAll();
 			} else {
-				DeselectAll();
+				deselectAll();
 			}
 		}
 
@@ -220,21 +220,21 @@ public class GraphingEngine {
 		return res;
 	}
 
-	void DeselectAll() {
+	void deselectAll() {
 		for (int i = 0; i < selectedNodes.size(); i++) {
 			selectedNodes.get(i).selected = false;
 		}
 		selectedNodes.clear();
 	}
 
-	void SelectAll() {
+	void selectAll() {
 		for (int i = 0; i < graphNodes.size(); i++) {
 			graphNodes.get(i).selected = true;
 			selectedNodes.add(graphNodes.get(i));
 		}
 	}
 
-	void SaveAs(Stage stage) {
+	void saveAs(Stage stage) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("DLH", "*.dlh"));
 		File file = fileChooser.showSaveDialog(stage);
@@ -242,18 +242,18 @@ public class GraphingEngine {
 			return;
 		}
 
-		SaveData(stage, file);
+		saveData(stage, file);
 	}
 
-	void Save(Stage stage) {
+	void save(Stage stage) {
 		if (currentFile == null) {
-			SaveAs(stage);
+			saveAs(stage);
 		} else {
-			SaveData(stage, currentFile);
+			saveData(stage, currentFile);
 		}
 	}
 
-	void SaveData(Stage stage, File f) {
+	void saveData(Stage stage, File f) {
 
 		FileOutputStream fileOut;
 		ObjectOutputStream out;
@@ -273,7 +273,7 @@ public class GraphingEngine {
 		}
 	}
 
-	void Load(Stage stage) {
+	void load(Stage stage) {
 
 		FileInputStream fileIn;
 		ObjectInputStream in;

@@ -1,6 +1,8 @@
 # Dilhan
 
-Dilhan is a tool for creating and analyzing undirected graphs
+![Logo](docs/screenshot_01.png)
+
+Dilhan is a tool for creating and analyzing undirected graphs.
 
 ## Features
   - Create and modify undirected graphs

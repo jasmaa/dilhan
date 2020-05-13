@@ -85,29 +85,29 @@ public class GraphToolDriver extends Application {
     	
     	// Canvas events
     	canvas.setOnDragDetected(e->{
-    		engine.InitDrag(e.getSceneX(), e.getSceneY());
-    		DrawGraph();
+    		engine.initDrag(e.getSceneX(), e.getSceneY());
+    		drawGraph();
     	});
     	canvas.setOnMouseReleased(e->{
-    		engine.EndDrag();
-    		DrawGraph();
+    		engine.endDrag();
+    		drawGraph();
     	});
     	canvas.setOnMouseDragged(e->{
-    		engine.Drag(e.getSceneX(), e.getSceneY());
-    		DrawGraph();
+    		engine.drag(e.getSceneX(), e.getSceneY());
+    		drawGraph();
     	});
     	canvas.setOnMouseClicked(e->{
-    		engine.MouseClick(e.getButton(), e.getSceneX(), e.getSceneY());
-    		DrawGraph();
+    		engine.mouseClick(e.getButton(), e.getSceneX(), e.getSceneY());
+    		drawGraph();
     	});
     	canvas.setOnMouseMoved(e->{
-    		engine.MouseMove(e.getSceneX(), e.getSceneY());
-    		DrawGraph();
+    		engine.mouseMove(e.getSceneX(), e.getSceneY());
+    		drawGraph();
     	});
     	
     	s.setOnKeyPressed(e->{
-    		engine.KeyPress(e.getCode());
-    		DrawGraph();
+    		engine.keyPress(e.getCode());
+    		drawGraph();
     	});
     	
     	gc = canvas.getGraphicsContext2D();
@@ -121,21 +121,21 @@ public class GraphToolDriver extends Application {
     	});
     	MenuItem loadOption = new MenuItem("Open...");
     	loadOption.setOnAction(e->{
-    		 engine.Load(pStage);
+    		 engine.load(pStage);
     		 if(engine.currentFile != null){
     			 pStage.setTitle(name + " - " + engine.currentFile.getPath());
     		 }
     	});
     	MenuItem saveOption = new MenuItem("Save");
     	saveOption.setOnAction(e->{
-    		engine.Save(pStage);
+    		engine.save(pStage);
     		if(engine.currentFile != null){
    			 pStage.setTitle(name + " - " + engine.currentFile.getPath());
    		 }
     	});
     	MenuItem saveAsOption = new MenuItem("Save As...");
     	saveAsOption.setOnAction(e->{
-    		engine.SaveAs(pStage);
+    		engine.saveAs(pStage);
     		if(engine.currentFile != null){
    			 pStage.setTitle(name + " - " + engine.currentFile.getPath());
    		 }
@@ -151,12 +151,15 @@ public class GraphToolDriver extends Application {
     	
         pStage.setScene(s);
         pStage.setTitle(name);
-        pStage.setResizable(false);
+        pStage.setResizable(false); //TODO: Make this work with different resolutions?
         pStage.getIcons().add(new Image("logo.png"));
         pStage.show();
     }
     
-    void DrawGraph(){
+    /**
+     * Renders graph
+     */
+    void drawGraph(){
     	gc.clearRect(0, 0, 800, 800);
     	
     	gc.setFill(Color.GRAY);
