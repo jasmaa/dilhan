@@ -27,10 +27,16 @@ export default class GraphingEngine {
         this.ctx = ctx;
     }
 
+    /**
+     * Gets total node count
+     */
     getNodeCount(): number {
         return this.nodes.length;
     }
 
+    /**
+     * Gets total edge count
+     */
     getEdgeCount(): number {
         return this.edges.reduce((acc: number, edge: GraphEdge) => acc + edge.n, 0);
     }
@@ -311,5 +317,3 @@ export default class GraphingEngine {
         }
     }
 }
-
-

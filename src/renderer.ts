@@ -1,4 +1,4 @@
-import { remote } from 'electron';
+import { remote, ipcRenderer } from 'electron';
 
 import { readGraph, writeGraph, getLoadedFile } from './serialize';
 import './styles.css';
@@ -25,10 +25,20 @@ window.onresize = () => {
     engine.render();
 }
 
-canvas.onmousedown = e => engine.onmousedownHandler(e);
-canvas.onmousemove = e => engine.onmousemoveHandler(e);
-canvas.onmouseup = e => engine.onmouseupHandler(e);
-document.onkeyup = e => engine.onkeyupHandler(e);
+canvas.onmousedown = e => {
+    engine.onmousedownHandler(e);
+};
+canvas.onmousemove = e => {
+    engine.onmousemoveHandler(e);
+}
+canvas.onmouseup = e => {
+    engine.onmouseupHandler(e);
+    ipcRenderer.send('setIsNeedSaving', true);
+}
+document.onkeyup = e => {
+    engine.onkeyupHandler(e);
+    ipcRenderer.send('setIsNeedSaving', true);
+}
 
 // === Menu ===
 
@@ -60,6 +70,8 @@ const menuTemplate = [{
                     engine.edges = readEdges;
                     engine.render();
 
+                    ipcRenderer.send('setIsNeedSaving', false);
+
                     remote.getCurrentWindow().setTitle(`${res.filePaths[0]} - Dilhan v${version}`);
                     menuTemplate[0].submenu[2].enabled = true;
 
@@ -76,6 +88,7 @@ const menuTemplate = [{
                 const loadedFile = getLoadedFile();
                 if (loadedFile) {
                     writeGraph(loadedFile, engine.nodes, engine.edges);
+                    ipcRenderer.send('setIsNeedSaving', false);
                 }
             }
         },
@@ -91,6 +104,8 @@ const menuTemplate = [{
 
                 const isSaved = writeGraph(res.filePath, engine.nodes, engine.edges);
                 if (isSaved) {
+
+                    ipcRenderer.send('setIsNeedSaving', false);
 
                     remote.getCurrentWindow().setTitle(`${res.filePath} - Dilhan v${version}`);
                     menuTemplate[0].submenu[2].enabled = true;

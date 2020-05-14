@@ -1,9 +1,14 @@
-import { app, dialog, BrowserWindow } from 'electron';
+import { app, dialog, ipcMain, BrowserWindow } from 'electron';
 
 let win: Electron.BrowserWindow;
 const version = process.env.npm_package_version || app.getVersion();
 
 app.allowRendererProcessReuse = true;
+
+let isNeedSaving = false;
+ipcMain.on('setIsNeedSaving', (event, arg) => {
+    isNeedSaving = arg;
+})
 
 function createWindow() {
     win = new BrowserWindow({
@@ -21,14 +26,16 @@ function createWindow() {
     win.loadFile('index.html');
 
     win.on('close', e => {
-        const choice = dialog.showMessageBoxSync({
-            type: 'question',
-            buttons: ['Yes', 'No'],
-            title: 'Confirm',
-            message: 'Are you sure you want to quit?'
-        });
-        if (choice === 1) {
-            e.preventDefault();
+        if (isNeedSaving) {
+            const choice = dialog.showMessageBoxSync({
+                type: 'question',
+                buttons: ['Yes', 'No'],
+                title: 'Confirm',
+                message: 'Are you sure you want to quit?'
+            });
+            if (choice === 1) {
+                e.preventDefault();
+            }
         }
     });
 }
