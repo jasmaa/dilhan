@@ -3,6 +3,8 @@ import { app, BrowserWindow } from 'electron';
 let win: Electron.BrowserWindow;
 const version = process.env.npm_package_version || app.getVersion();
 
+app.allowRendererProcessReuse = true;
+
 function createWindow() {
     win = new BrowserWindow({
         title: `Dilhan - v${version}`,
@@ -10,9 +12,11 @@ function createWindow() {
         width: 800,
         icon: 'src/logo.png',
         webPreferences: {
-            webSecurity: false
+            nodeIntegration: true,
         },
     });
+
+    win.webContents.openDevTools();
 
     win.loadFile('index.html');
 }

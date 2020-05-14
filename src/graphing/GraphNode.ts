@@ -5,11 +5,9 @@ export default class GraphNode {
 
     r: number;
     selected: boolean;
-    neighbors: GraphNode[];
 
     constructor(public x: number, public y: number) {
         this.selected = false;
-        this.neighbors = [];
         this.r = 10;
     }
 

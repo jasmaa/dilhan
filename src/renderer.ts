@@ -1,6 +1,8 @@
+import { remote } from 'electron';
 import GraphNode from './graphing/GraphNode';
 import GraphEdge from './graphing/GraphEdge';
 import { calculateControl } from './utils';
+import { readGraph, writeGraph, getLoadedFile } from './serialize';
 import './styles.css';
 
 enum State {
@@ -12,8 +14,8 @@ enum State {
 const canvas = <HTMLCanvasElement>document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
-const nodes: GraphNode[] = [];
-const edges: GraphEdge[] = [];
+let nodes: GraphNode[] = [];
+let edges: GraphEdge[] = [];
 
 let draggingNodes: GraphNode[] = [];
 let prevX: number;
@@ -68,10 +70,10 @@ function render(): void {
         ctx.closePath();
     }
 
-    const n = 
+    const n =
 
-    // Render graph info
-    ctx.fillStyle = 'black';
+        // Render graph info
+        ctx.fillStyle = 'black';
     ctx.textBaseline = 'hanging';
     ctx.font = "20px Arial";
     ctx.fillText(`Nodes: ${nodes.length}`, 10, 10);
@@ -188,8 +190,8 @@ document.onkeyup = e => {
                 }
 
                 if (!isEdgeFound) {
-                    selectedNodes[0].neighbors.push(selectedNodes[1]);
-                    selectedNodes[1].neighbors.push(selectedNodes[0]);
+                    //selectedNodes[0].neighbors.push(selectedNodes[1]);
+                    //selectedNodes[1].neighbors.push(selectedNodes[0]);
                     edges.push(new GraphEdge(selectedNodes[0], selectedNodes[1]));
                 }
 
@@ -247,3 +249,57 @@ document.onkeyup = e => {
             break;
     }
 }
+
+// === Menu ===
+const menu = new remote.Menu();
+menu.append(new remote.MenuItem({
+    label: 'File',
+    submenu: [
+        {
+            label: 'New',
+            click() {
+                nodes = [];
+                edges = [];
+                render();
+            }
+        },
+        {
+            label: 'Open...',
+            async click() {
+                const res = await remote.dialog.showOpenDialog({ properties: ['openFile'] });
+
+                if (res.filePaths.length > 0) {
+                    const [readNodes, readEdges] = readGraph(res.filePaths[0]);
+                    nodes = readNodes;
+                    edges = readEdges;
+                    render();
+                }
+            }
+        },
+        {
+            label: 'Save',
+            //enabled: !!getLoadedFile(),
+            async click() {
+                const loadedFile = getLoadedFile();
+                if(loadedFile) {
+                    writeGraph(loadedFile, nodes, edges);
+                }
+            }
+        },
+        {
+            label: 'Save As...',
+            async click() {
+                const res = await remote.dialog.showSaveDialog({});
+                writeGraph(res.filePath, nodes, edges);
+            }
+        },
+        {
+            label: 'Exit',
+            click() {
+                remote.app.quit();
+            }
+        },
+    ],
+}));
+
+remote.getCurrentWindow().setMenu(menu);
