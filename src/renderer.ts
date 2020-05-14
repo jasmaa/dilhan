@@ -18,9 +18,8 @@ const edges: GraphEdge[] = [];
 let draggingNodes: GraphNode[] = [];
 let prevX: number;
 let prevY: number;
-
 let isMouseDown = false;
-let state: State = State.IDLE;
+let state = State.IDLE;
 
 /**
  * Selects or deselects all nodes
@@ -39,6 +38,7 @@ function render(): void {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Render edges
     for (const edge of edges) {
 
         ctx.strokeStyle = 'cyan';
@@ -53,6 +53,7 @@ function render(): void {
         }
     }
 
+    // Render nodes
     for (const node of nodes) {
 
         if (node.selected) {
@@ -66,6 +67,16 @@ function render(): void {
         ctx.fill();
         ctx.closePath();
     }
+
+    const n = 
+
+    // Render graph info
+    ctx.fillStyle = 'black';
+    ctx.textBaseline = 'hanging';
+    ctx.font = "20px Arial";
+    ctx.fillText(`Nodes: ${nodes.length}`, 10, 10);
+    ctx.fillText(`Edges: ${edges.reduce((acc: number, edge: GraphEdge) => acc + edge.n, 0)}`, 10, 40);
+
 }
 
 // === Event handlers ===
@@ -133,6 +144,7 @@ canvas.onmouseup = e => {
             for (const node of nodes) {
                 if (node.intersect(e.x, e.y)) {
                     node.selected = !node.selected;
+                    break;
                 }
             }
         } else if (state === State.GRABBING) {
@@ -209,11 +221,12 @@ document.onkeyup = e => {
                         //edges.splice(edges.indexOf(edge), 1);
                         edge.n--;
 
+                        setAll(false);
+                        render();
                         break;
                     }
                 }
             }
-            render();
             break;
         case 46:
             // Node deletion

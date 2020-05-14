@@ -8,7 +8,7 @@
   "scripts": {
     "build": "node_modules/.bin/webpack",
     "start": "yarn build && electron ./dist/main.js",
-    "deploy": "yarn build && electron-packager ./dist dilhan platform=win32 --overwrite --out=releases/"
+    "deploy": "yarn build && electron-packager ./dist dilhan --overwrite --out=releases/ --icon=src/logo.ico"
   },
   "dependencies": {},
   "devDependencies": {

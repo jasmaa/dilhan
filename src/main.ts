@@ -8,15 +8,13 @@ function createWindow() {
         title: `Dilhan - v${version}`,
         height: 600,
         width: 800,
+        icon: 'src/logo.png',
         webPreferences: {
             webSecurity: false
         },
     });
 
     win.loadFile('index.html');
-
-    // open dev tools for now
-    // win.webContents.openDevTools();
 }
 
 app.on('ready', createWindow);
