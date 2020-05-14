@@ -1,6 +1,6 @@
 {
   "name": "dilhan",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "main.js",
   "repository": "https://github.com/jasmaa/dilhan.git",
   "author": "jasmaa <jasonmaa3955@gmail.com>",
@@ -8,7 +8,7 @@
   "scripts": {
     "build": "node_modules/.bin/webpack",
     "start": "yarn build && electron ./dist/main.js",
-    "deploy": "yarn build && electron-packager ./dist dilhan platform=win32 --overwrite"
+    "deploy": "yarn build && electron-packager ./dist dilhan platform=win32 --overwrite --out=releases/"
   },
   "dependencies": {},
   "devDependencies": {

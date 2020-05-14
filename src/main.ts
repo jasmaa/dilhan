@@ -1,9 +1,11 @@
 import { app, BrowserWindow } from 'electron';
 
 let win: Electron.BrowserWindow;
+const version = process.env.npm_package_version || app.getVersion();
 
 function createWindow() {
     win = new BrowserWindow({
+        title: `Dilhan - v${version}`,
         height: 600,
         width: 800,
         webPreferences: {
@@ -14,7 +16,7 @@ function createWindow() {
     win.loadFile('index.html');
 
     // open dev tools for now
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
 }
 
 app.on('ready', createWindow);

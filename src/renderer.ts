@@ -1,6 +1,7 @@
-import './styles.css';
 import GraphNode from './graphing/GraphNode';
 import GraphEdge from './graphing/GraphEdge';
+import { calculateControl } from './utils';
+import './styles.css';
 
 enum State {
     DRAGGING,
@@ -21,12 +22,19 @@ let prevY: number;
 let isMouseDown = false;
 let state: State = State.IDLE;
 
+/**
+ * Selects or deselects all nodes
+ * @param v 
+ */
 function setAll(v: boolean): void {
     for (const node of nodes) {
         node.selected = v;
     }
 }
 
+/**
+ * Render graph
+ */
 function render(): void {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -34,11 +42,15 @@ function render(): void {
     for (const edge of edges) {
 
         ctx.strokeStyle = 'cyan';
-        ctx.beginPath();
-        ctx.moveTo(edge.node1.x, edge.node1.y);
-        ctx.lineTo(edge.node2.x, edge.node2.y);
-        ctx.closePath();
-        ctx.stroke();
+
+        for (let i = 0; i < edge.n; i++) {
+            ctx.beginPath();
+            ctx.moveTo(edge.node1.x, edge.node1.y);
+            const { x, y } = calculateControl(edge.node1.x, edge.node1.y, edge.node2.x, edge.node2.y, 30, i);
+            ctx.quadraticCurveTo(x, y, edge.node2.x, edge.node2.y);
+            ctx.stroke();
+            ctx.closePath();
+        }
     }
 
     for (const node of nodes) {
@@ -51,8 +63,8 @@ function render(): void {
 
         ctx.beginPath();
         ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI);
-        ctx.closePath();
         ctx.fill();
+        ctx.closePath();
     }
 }
 
@@ -150,10 +162,26 @@ document.onkeyup = e => {
     switch (e.keyCode) {
         case 70:
             // Edge addition
-            if (selectedNodes.length === 2) {
-                selectedNodes[0].neighbors.push(selectedNodes[1]);
-                selectedNodes[1].neighbors.push(selectedNodes[0]);
-                edges.push(new GraphEdge(selectedNodes[0], selectedNodes[1]));
+            if (selectedNodes.length === 2 && state === State.IDLE) {
+
+                let isEdgeFound = false;
+                for (const edge of edges) {
+                    if (edge.node1 === selectedNodes[0] && edge.node2 === selectedNodes[1] ||
+                        edge.node1 === selectedNodes[1] && edge.node2 === selectedNodes[0]) {
+
+                        edge.n++;
+                        isEdgeFound = true;
+                        break;
+                    }
+                }
+
+                if (!isEdgeFound) {
+                    selectedNodes[0].neighbors.push(selectedNodes[1]);
+                    selectedNodes[1].neighbors.push(selectedNodes[0]);
+                    edges.push(new GraphEdge(selectedNodes[0], selectedNodes[1]));
+                }
+
+                state = State.IDLE;
                 setAll(false);
             }
             render();
@@ -177,7 +205,10 @@ document.onkeyup = e => {
                 for (const edge of edgeBuffer) {
                     if (edge.node1 === selectedNodes[0] && edge.node2 === selectedNodes[1] ||
                         edge.node1 === selectedNodes[1] && edge.node2 === selectedNodes[0]) {
-                        edges.splice(edges.indexOf(edge), 1);
+
+                        //edges.splice(edges.indexOf(edge), 1);
+                        edge.n--;
+
                         break;
                     }
                 }

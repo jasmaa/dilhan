@@ -1,3 +1,6 @@
+/**
+ * Graph node
+ */
 export default class GraphNode {
 
     r: number;
