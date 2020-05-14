@@ -8,7 +8,7 @@ Dilhan is a tool for creating and analyzing undirected graphs.
 
 Download latest release from [releases](https://github.com/jasmaa/dilhan/releases)
 
-## Controls
+### Controls
 
   - Make node (RMC)
   - Make edge (F)
@@ -19,8 +19,7 @@ Download latest release from [releases](https://github.com/jasmaa/dilhan/release
   - Grab (G)
   - Move (LMC + drag)
 
-
-# Development
+## Development
 
 ### Local Development
     yarn install
