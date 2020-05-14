@@ -4,6 +4,7 @@ import GraphEdge from './graphing/GraphEdge';
 
 enum State {
     DRAGGING,
+    GRABBING,
     IDLE,
 }
 
@@ -91,10 +92,12 @@ canvas.onmousedown = e => {
 }
 canvas.onmousemove = e => {
 
-    // Drag nodes
-    if (isMouseDown || state === State.DRAGGING) {
-
+    if (isMouseDown) {
         state = State.DRAGGING;
+    }
+
+    // Drag nodes
+    if (state === State.DRAGGING || state === State.GRABBING) {
 
         const diffX = e.x - prevX;
         const diffY = e.y - prevY;
@@ -114,13 +117,13 @@ canvas.onmouseup = e => {
 
     if (e.button === 0) {
         // Select node if not dragging
-        if (state !== State.DRAGGING) {
+        if (state === State.IDLE) {
             for (const node of nodes) {
                 if (node.intersect(e.x, e.y)) {
                     node.selected = !node.selected;
                 }
             }
-        } else {
+        } else if (state === State.GRABBING) {
             setAll(false);
         }
         render();
@@ -146,7 +149,7 @@ document.onkeyup = e => {
 
     switch (e.keyCode) {
         case 70:
-            // Edge connection
+            // Edge addition
             if (selectedNodes.length === 2) {
                 selectedNodes[0].neighbors.push(selectedNodes[1]);
                 selectedNodes[1].neighbors.push(selectedNodes[0]);
@@ -162,8 +165,39 @@ document.onkeyup = e => {
             break;
         case 71:
             // Turn on grabbing
-            state = State.DRAGGING;
-            draggingNodes = selectedNodes;
+            if (selectedNodes.length > 0) {
+                state = State.GRABBING;
+                draggingNodes = selectedNodes;
+            }
+            break;
+        case 68:
+            // Edge deletion
+            if (selectedNodes.length === 2) {
+                const edgeBuffer = [...edges]; // Make a buffer for looping
+                for (const edge of edgeBuffer) {
+                    if (edge.node1 === selectedNodes[0] && edge.node2 === selectedNodes[1] ||
+                        edge.node1 === selectedNodes[1] && edge.node2 === selectedNodes[0]) {
+                        edges.splice(edges.indexOf(edge), 1);
+                        break;
+                    }
+                }
+            }
+            render();
+            break;
+        case 46:
+            // Node deletion
+            for (const node of selectedNodes) {
+
+                nodes.splice(nodes.indexOf(node), 1);
+
+                const edgeBuffer = [...edges]; // Make a buffer for looping
+                for (const edge of edgeBuffer) {
+                    if (edge.node1 === node || edge.node2 === node) {
+                        edges.splice(edges.indexOf(edge), 1);
+                    }
+                }
+            }
+            render();
             break;
         default:
             break;
