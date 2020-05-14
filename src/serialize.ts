@@ -27,7 +27,7 @@ export function readGraph(path: string): [GraphNode[], GraphEdge[]] {
 
     const edges = [];
     for (const edgeData of data.edges) {
-        edges.push(new GraphEdge(nodes[edgeData.node1], nodes[edgeData.node2]));
+        edges.push(new GraphEdge(nodes[edgeData.node1], nodes[edgeData.node2], edgeData.n));
     }
 
     // Remember loaded file
@@ -63,6 +63,7 @@ export function writeGraph(path: string, nodes: GraphNode[], edges: GraphEdge[])
         writeEdges.push({
             node1: nodes.indexOf(edge.node1),
             node2: nodes.indexOf(edge.node2),
+            n: edge.n,
         });
     }
 

@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, dialog, BrowserWindow } from 'electron';
 
 let win: Electron.BrowserWindow;
 const version = process.env.npm_package_version || app.getVersion();
@@ -7,7 +7,7 @@ app.allowRendererProcessReuse = true;
 
 function createWindow() {
     win = new BrowserWindow({
-        title: `Dilhan - v${version}`,
+        title: `Untitled - Dilhan v${version}`,
         height: 600,
         width: 800,
         icon: 'src/logo.png',
@@ -16,9 +16,21 @@ function createWindow() {
         },
     });
 
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
 
     win.loadFile('index.html');
+
+    win.on('close', e => {
+        const choice = dialog.showMessageBoxSync({
+            type: 'question',
+            buttons: ['Yes', 'No'],
+            title: 'Confirm',
+            message: 'Are you sure you want to quit?'
+        });
+        if (choice === 1) {
+            e.preventDefault();
+        }
+    });
 }
 
 app.on('ready', createWindow);
