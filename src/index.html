@@ -6,8 +6,22 @@
 </head>
 
 <body>
+    <div id="controlPanel" class="d-flex w-100 p-3">
+        <div class="btn btn-primary btn-sm">Hi there</div>
+        <input />
+    </div>
 
     <canvas id="mainCanvas"></canvas>
+
+    <div id="infoPanel" class="d-flex justify-content-between w-100 p-1">
+        <div>
+            <span id="nodeCount" class="m-1"></span>
+            <span id="edgeCount" class="m-1"></span>
+        </div>
+        <div>
+            <div id="testBtn" class="btn btn-primary btn-sm">Test</div>
+        </div>
+    </div>
 
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>

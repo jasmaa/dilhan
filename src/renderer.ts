@@ -1,14 +1,39 @@
 import { remote, ipcRenderer } from 'electron';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
+import GraphingEngine from './graphing/GraphingEngine';
 import { readGraph, writeGraph, getLoadedFile } from './serialize';
 import './styles.css';
-import GraphingEngine from './graphing/GraphingEngine';
 
-const dpr = window.devicePixelRatio || 1
+const dpr = window.devicePixelRatio || 1;
+
 const canvas = <HTMLCanvasElement>document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
-const engine = new GraphingEngine(ctx, dpr);
+const controlPanelElement = document.getElementById('controlPanel');
+let isControlPanelOpen = false;
+const nodeCountElement = document.getElementById('nodeCount');
+const edgeCountElement = document.getElementById('edgeCount');
+
+// TODO: control panel testing
+const testBtn = document.getElementById('testBtn');
+testBtn.onclick = () => {
+    if (isControlPanelOpen) {
+        controlPanelElement.style.maxHeight = '0em';
+        setTimeout(() => controlPanelElement.style.visibility = 'hidden', 150);
+    } else {
+        controlPanelElement.style.maxHeight = '20em';
+        controlPanelElement.style.visibility = 'visible';
+    }
+
+    isControlPanelOpen = !isControlPanelOpen;
+}
+
+const engine = new GraphingEngine(ctx, dpr, (engine: GraphingEngine) => {
+    nodeCountElement.innerHTML = `Vertices: ${engine.getNodeCount()}`;
+    edgeCountElement.innerHTML = `Edges: ${engine.getEdgeCount()}`;
+    ipcRenderer.send('setIsNeedSaving', true);
+});
 
 // === Event handlers ===
 
@@ -35,11 +60,9 @@ canvas.onmousemove = e => {
 }
 canvas.onmouseup = e => {
     engine.onmouseupHandler(e);
-    ipcRenderer.send('setIsNeedSaving', true);
 }
 document.onkeyup = e => {
     engine.onkeyupHandler(e);
-    ipcRenderer.send('setIsNeedSaving', true);
 }
 
 // === Menu ===

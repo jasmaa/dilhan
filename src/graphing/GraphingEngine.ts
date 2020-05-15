@@ -1,6 +1,6 @@
 import GraphNode from './GraphNode';
 import GraphEdge from './GraphEdge';
-import { calculateControl } from '../utils';
+import { findMousePosition, calculateControl } from '../utils';
 
 enum State {
     DRAGGING,
@@ -19,14 +19,16 @@ export default class GraphingEngine {
 
     private ctx: CanvasRenderingContext2D;
     private dpr: number;
+    private renderCallback: Function;
     private draggingNodes: GraphNode[] = [];
     private prevX: number;
     private prevY: number;
     private isMouseDown = false;
 
-    constructor(ctx: CanvasRenderingContext2D, dpr: number) {
+    constructor(ctx: CanvasRenderingContext2D, dpr: number, renderCallback: Function) {
         this.ctx = ctx;
         this.dpr = dpr;
+        this.renderCallback = renderCallback;
     }
 
     /**
@@ -185,12 +187,7 @@ export default class GraphingEngine {
             this.ctx.closePath();
         }
 
-        // Render graph info
-        this.ctx.fillStyle = 'black';
-        this.ctx.textBaseline = 'hanging';
-        this.ctx.font = "40px Arial";
-        this.ctx.fillText(`Nodes: ${this.getNodeCount()}`, 10, 10);
-        this.ctx.fillText(`Edges: ${this.getEdgeCount()}`, 10, 40);
+        this.renderCallback(this);
     }
 
     /**
@@ -206,14 +203,17 @@ export default class GraphingEngine {
     // === Handlers ===
 
     onmousedownHandler(e: MouseEvent) {
+
+        const { x, y } = findMousePosition(this.ctx.canvas, e);
+
         // Drag
         if (e.button === 0) {
 
-            this.prevX = e.x;
-            this.prevY = e.y;
+            this.prevX = x;
+            this.prevY = y;
 
             for (const node of this.nodes) {
-                if (node.intersect(e.x, e.y)) {
+                if (node.intersect(x, y)) {
                     this.draggingNodes = [node];
                     break;
                 }
@@ -225,6 +225,8 @@ export default class GraphingEngine {
 
     onmousemoveHandler(e: MouseEvent) {
 
+        const { x, y } = findMousePosition(this.ctx.canvas, e);
+
         if (this.isMouseDown) {
             this.state = State.DRAGGING;
         }
@@ -232,8 +234,8 @@ export default class GraphingEngine {
         // Drag nodes
         if (this.state === State.DRAGGING || this.state === State.GRABBING) {
 
-            const diffX = e.x - this.prevX;
-            const diffY = e.y - this.prevY;
+            const diffX = x - this.prevX;
+            const diffY = y - this.prevY;
 
             for (const node of this.draggingNodes) {
                 node.x += diffX;
@@ -243,17 +245,19 @@ export default class GraphingEngine {
             this.render();
         }
 
-        this.prevX = e.x;
-        this.prevY = e.y;
+        this.prevX = x;
+        this.prevY = y;
     }
 
     onmouseupHandler(e: MouseEvent) {
+
+        const { x, y } = findMousePosition(this.ctx.canvas, e);
 
         if (e.button === 0) {
             // Select node if not dragging
             if (this.state === State.IDLE) {
                 for (const node of this.nodes) {
-                    if (node.intersect(e.x, e.y)) {
+                    if (node.intersect(x, y)) {
                         node.selected = !node.selected;
                         break;
                     }
@@ -263,9 +267,8 @@ export default class GraphingEngine {
             }
             this.render();
         } else if (e.button === 2) {
-
             // Create new node
-            this.addNode(new GraphNode(e.x, e.y))
+            this.addNode(new GraphNode(x, y))
             this.setAll(false);
             this.render();
         }

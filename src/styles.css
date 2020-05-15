@@ -8,3 +8,18 @@ html, body {
 canvas {
     background-color: white;
 }
+
+#controlPanel {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.5);
+    visibility: hidden;
+    max-height: 0;
+    transition: max-height 0.15s ease-out;
+}
+
+#infoPanel {
+    position: fixed;
+    bottom: 0;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+}
