@@ -4,16 +4,18 @@ import { readGraph, writeGraph, getLoadedFile } from './serialize';
 import './styles.css';
 import GraphingEngine from './graphing/GraphingEngine';
 
+const dpr = window.devicePixelRatio || 1
 const canvas = <HTMLCanvasElement>document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
-const engine = new GraphingEngine(ctx);
+const engine = new GraphingEngine(ctx, dpr);
 
 // === Event handlers ===
 
 function resize(): void {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    ctx.scale(1 / dpr, 1 / dpr);
 }
 
 window.onload = () => {

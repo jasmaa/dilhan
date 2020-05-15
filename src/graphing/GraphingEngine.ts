@@ -17,14 +17,16 @@ export default class GraphingEngine {
     edges: GraphEdge[] = [];
     state = State.IDLE;
 
-    private ctx: CanvasRenderingContext2D
+    private ctx: CanvasRenderingContext2D;
+    private dpr: number;
     private draggingNodes: GraphNode[] = [];
     private prevX: number;
     private prevY: number;
     private isMouseDown = false;
 
-    constructor(ctx: CanvasRenderingContext2D) {
+    constructor(ctx: CanvasRenderingContext2D, dpr: number) {
         this.ctx = ctx;
+        this.dpr = dpr;
     }
 
     /**
@@ -140,18 +142,24 @@ export default class GraphingEngine {
      */
     render() {
 
-        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width * this.dpr, this.ctx.canvas.height * this.dpr);
+
+        this.ctx.lineWidth = 3 * this.dpr;
 
         // Render edges
         for (const edge of this.edges) {
 
-            this.ctx.strokeStyle = 'cyan';
+            this.ctx.strokeStyle = 'black';
 
             for (let i = 0; i < edge.n; i++) {
                 this.ctx.beginPath();
-                this.ctx.moveTo(edge.node1.x, edge.node1.y);
-                const { x, y } = calculateControl(edge.node1.x, edge.node1.y, edge.node2.x, edge.node2.y, 30, i);
-                this.ctx.quadraticCurveTo(x, y, edge.node2.x, edge.node2.y);
+                this.ctx.moveTo(edge.node1.x * this.dpr, edge.node1.y * this.dpr);
+                const { x, y } = calculateControl(
+                    edge.node1.x, edge.node1.y,
+                    edge.node2.x, edge.node2.y,
+                    30, i
+                );
+                this.ctx.quadraticCurveTo(x * this.dpr, y * this.dpr, edge.node2.x * this.dpr, edge.node2.y * this.dpr);
                 this.ctx.stroke();
                 this.ctx.closePath();
             }
@@ -161,21 +169,26 @@ export default class GraphingEngine {
         for (const node of this.nodes) {
 
             if (node.selected) {
-                this.ctx.fillStyle = 'red';
-            } else {
-                this.ctx.fillStyle = 'black';
+                this.ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                this.ctx.beginPath();
+                this.ctx.arc(node.x * this.dpr, node.y * this.dpr, 1.5 * node.r * this.dpr, 0, 2 * Math.PI);
+                this.ctx.fill();
+                this.ctx.closePath();
             }
 
+            this.ctx.fillStyle = 'blue';
+            this.ctx.strokeStyle = 'black';
             this.ctx.beginPath();
-            this.ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI);
+            this.ctx.arc(node.x * this.dpr, node.y * this.dpr, node.r * this.dpr, 0, 2 * Math.PI);
             this.ctx.fill();
+            this.ctx.stroke();
             this.ctx.closePath();
         }
 
         // Render graph info
         this.ctx.fillStyle = 'black';
         this.ctx.textBaseline = 'hanging';
-        this.ctx.font = "20px Arial";
+        this.ctx.font = "40px Arial";
         this.ctx.fillText(`Nodes: ${this.getNodeCount()}`, 10, 10);
         this.ctx.fillText(`Edges: ${this.getEdgeCount()}`, 10, 40);
     }
@@ -250,6 +263,7 @@ export default class GraphingEngine {
             }
             this.render();
         } else if (e.button === 2) {
+
             // Create new node
             this.addNode(new GraphNode(e.x, e.y))
             this.setAll(false);
