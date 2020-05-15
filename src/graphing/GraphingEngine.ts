@@ -178,7 +178,7 @@ export default class GraphingEngine {
                 this.ctx.closePath();
             }
 
-            this.ctx.fillStyle = 'blue';
+            this.ctx.fillStyle = node.color;
             this.ctx.strokeStyle = 'black';
             this.ctx.beginPath();
             this.ctx.arc(node.x * this.dpr, node.y * this.dpr, node.r * this.dpr, 0, 2 * Math.PI);

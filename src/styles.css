@@ -9,12 +9,43 @@ canvas {
     background-color: white;
 }
 
+.color-picker {
+    display: flex;
+}
+
+.color-picker > .color-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.color-picker > .color-cell > input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.color-picker > .color-cell > .checkmark {
+    width: 1em;
+    height: 1em;
+    outline: solid;
+    top: 50%;
+    left: 50%;
+}
+
+.color-picker > .color-cell > input:checked ~ .checkmark {
+    outline-width: 0.3em;
+}
+
+
 #controlPanel {
     position: fixed;
     background-color: rgba(0, 0, 0, 0.5);
     visibility: hidden;
     max-height: 0;
     transition: max-height 0.15s ease-out;
+    user-select: none;
 }
 
 #infoPanel {
@@ -22,4 +53,5 @@ canvas {
     bottom: 0;
     color: white;
     background-color: rgba(0, 0, 0, 0.5);
+    user-select: none;
 }

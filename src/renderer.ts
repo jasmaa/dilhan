@@ -14,24 +14,53 @@ const controlPanelElement = document.getElementById('controlPanel');
 let isControlPanelOpen = false;
 const nodeCountElement = document.getElementById('nodeCount');
 const edgeCountElement = document.getElementById('edgeCount');
+const colorSelectElements = document.getElementsByClassName('color-radio');
 
-// TODO: control panel testing
-const testBtn = document.getElementById('testBtn');
-testBtn.onclick = () => {
-    if (isControlPanelOpen) {
-        controlPanelElement.style.maxHeight = '0em';
-        setTimeout(() => controlPanelElement.style.visibility = 'hidden', 150);
-    } else {
+// Init handler on color picker
+for (const v of Array.from(colorSelectElements)) {
+    const colorCell = <HTMLInputElement>v;
+    colorCell.onclick = () => {
+        engine.nodes
+            .filter(n => n.selected)
+            .forEach(n => {
+                n.color = colorCell.value;
+            });
+        engine.render();
+    }
+}
+
+function setControlPanelVisible(visible: boolean): void {
+    if (visible) {
         controlPanelElement.style.maxHeight = '20em';
         controlPanelElement.style.visibility = 'visible';
+
+    } else {
+        controlPanelElement.style.maxHeight = '0em';
+        setTimeout(() => controlPanelElement.style.visibility = 'hidden', 150);
     }
 
-    isControlPanelOpen = !isControlPanelOpen;
+    isControlPanelOpen = visible;
 }
 
 const engine = new GraphingEngine(ctx, dpr, (engine: GraphingEngine) => {
+
+    // Update UI
     nodeCountElement.innerHTML = `Vertices: ${engine.getNodeCount()}`;
     edgeCountElement.innerHTML = `Edges: ${engine.getEdgeCount()}`;
+
+    const selectedNodes = engine.nodes.filter(n => n.selected);
+    if (selectedNodes.length === 1 && !isControlPanelOpen) {
+        // Set correct color cell
+        for (const v of Array.from(colorSelectElements)) {
+            const colorCell = <HTMLInputElement>v;
+            colorCell.checked = colorCell.value === selectedNodes[0].color;
+        }
+        setControlPanelVisible(true);
+    } else if (selectedNodes.length !== 1 && isControlPanelOpen) {
+        setControlPanelVisible(false);
+    }
+
+    // Update save state
     ipcRenderer.send('setIsNeedSaving', true);
 });
 
