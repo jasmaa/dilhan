@@ -6,7 +6,7 @@ export default class GraphNode {
     r: number;
     selected: boolean;
 
-    constructor(public x: number, public y: number, public color: string = 'blue', public name: string = '') {
+    constructor(public x: number, public y: number, public color: string = '#0275d8', public name: string = '') {
         this.selected = false;
         this.r = 10;
     }

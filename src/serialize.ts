@@ -5,6 +5,13 @@ import GraphEdge from './graphing/GraphEdge';
 let loadedFile: string;
 
 /**
+ * Clears loaded file
+ */
+export function clearLoadedFile(): void {
+    loadedFile = undefined;
+}
+
+/**
  * Gets loaded file
  */
 export function getLoadedFile(): string {

@@ -2,7 +2,7 @@ import { remote, ipcRenderer } from 'electron';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import GraphingEngine from './graphing/GraphingEngine';
-import { readGraph, writeGraph, getLoadedFile } from './serialize';
+import { readGraph, writeGraph, getLoadedFile, clearLoadedFile } from './serialize';
 import './styles.css';
 
 const dpr = window.devicePixelRatio || 1;
@@ -126,6 +126,16 @@ const menuTemplate = [{
             click() {
                 engine.clear();
                 engine.render();
+
+                clearLoadedFile();
+                ipcRenderer.send('setIsNeedSaving', true);
+
+                remote.getCurrentWindow().setTitle(`Untitled - Dilhan v${version}`);
+
+                // Rebuild menu
+                menuTemplate[0].submenu[2].enabled = false;
+                const menu = remote.Menu.buildFromTemplate(menuTemplate);
+                remote.Menu.setApplicationMenu(menu);
             }
         },
         {
@@ -147,9 +157,9 @@ const menuTemplate = [{
                     ipcRenderer.send('setIsNeedSaving', false);
 
                     remote.getCurrentWindow().setTitle(`${res.filePaths[0]} - Dilhan v${version}`);
-                    menuTemplate[0].submenu[2].enabled = true;
 
                     // Rebuild menu
+                    menuTemplate[0].submenu[2].enabled = true;
                     const menu = remote.Menu.buildFromTemplate(menuTemplate);
                     remote.Menu.setApplicationMenu(menu);
                 }
@@ -182,9 +192,9 @@ const menuTemplate = [{
                     ipcRenderer.send('setIsNeedSaving', false);
 
                     remote.getCurrentWindow().setTitle(`${res.filePath} - Dilhan v${version}`);
-                    menuTemplate[0].submenu[2].enabled = true;
 
                     // Rebuild menu
+                    menuTemplate[0].submenu[2].enabled = true;
                     const menu = remote.Menu.buildFromTemplate(menuTemplate);
                     remote.Menu.setApplicationMenu(menu);
                 }
