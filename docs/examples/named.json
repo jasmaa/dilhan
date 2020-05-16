@@ -1,0 +1,1 @@
+{"nodes":[{"x":465,"y":380,"color":"blue","name":"Jim"},{"x":161,"y":105,"color":"yellow","name":"Bob"},{"x":363,"y":157,"color":"green","name":"Alice"}],"edges":[{"node1":0,"node2":2,"n":1},{"node1":1,"node2":2,"n":1}]}

@@ -11,24 +11,18 @@ const canvas = <HTMLCanvasElement>document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
 const controlPanelElement = document.getElementById('controlPanel');
-let isControlPanelOpen = false;
 const nodeCountElement = document.getElementById('nodeCount');
 const edgeCountElement = document.getElementById('edgeCount');
 const colorSelectElements = document.getElementsByClassName('color-radio');
+const nodeNameInputElement = <HTMLInputElement>document.getElementById('nodeNameInput');
 
-// Init handler on color picker
-for (const v of Array.from(colorSelectElements)) {
-    const colorCell = <HTMLInputElement>v;
-    colorCell.onclick = () => {
-        engine.nodes
-            .filter(n => n.selected)
-            .forEach(n => {
-                n.color = colorCell.value;
-            });
-        engine.render();
-    }
-}
+let isControlPanelOpen = false;
 
+/**
+ * Set visibility of control panel
+ * 
+ * @param visible 
+ */
 function setControlPanelVisible(visible: boolean): void {
     if (visible) {
         controlPanelElement.style.maxHeight = '20em';
@@ -42,21 +36,47 @@ function setControlPanelVisible(visible: boolean): void {
     isControlPanelOpen = visible;
 }
 
+// === Init handlers ===
+
+for (const v of Array.from(colorSelectElements)) {
+    const colorCell = <HTMLInputElement>v;
+    colorCell.onclick = () => {
+        engine.nodes
+            .filter(node => node.selected)
+            .forEach(node => node.color = colorCell.value);
+        engine.render();
+    }
+}
+
+nodeNameInputElement.oninput = e => {
+    engine.nodes
+        .filter(node => node.selected)
+        .forEach(node => node.name = (<HTMLInputElement>e.target).value);
+    engine.render();
+}
+
+
 const engine = new GraphingEngine(ctx, dpr, (engine: GraphingEngine) => {
 
     // Update UI
     nodeCountElement.innerHTML = `Vertices: ${engine.getNodeCount()}`;
     edgeCountElement.innerHTML = `Edges: ${engine.getEdgeCount()}`;
 
-    const selectedNodes = engine.nodes.filter(n => n.selected);
+    const selectedNodes = engine.nodes.filter(node => node.selected);
     if (selectedNodes.length === 1 && !isControlPanelOpen) {
-        // Set correct color cell
+
+        // Set control panel
         for (const v of Array.from(colorSelectElements)) {
             const colorCell = <HTMLInputElement>v;
             colorCell.checked = colorCell.value === selectedNodes[0].color;
         }
+
+        nodeNameInputElement.value = selectedNodes[0].name;
+
         setControlPanelVisible(true);
+
     } else if (selectedNodes.length !== 1 && isControlPanelOpen) {
+
         setControlPanelVisible(false);
     }
 
@@ -90,7 +110,7 @@ canvas.onmousemove = e => {
 canvas.onmouseup = e => {
     engine.onmouseupHandler(e);
 }
-document.onkeyup = e => {
+canvas.onkeyup = e => {
     engine.onkeyupHandler(e);
 }
 

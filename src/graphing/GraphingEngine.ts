@@ -185,6 +185,12 @@ export default class GraphingEngine {
             this.ctx.fill();
             this.ctx.stroke();
             this.ctx.closePath();
+
+            if (node.name.length > 0) {
+                this.ctx.fillStyle = 'red';
+                this.ctx.font = `${20 * this.dpr}px Arial`;
+                this.ctx.fillText(node.name, node.x * this.dpr, (node.y - 20) * this.dpr);
+            }
         }
 
         this.renderCallback(this);
@@ -256,16 +262,27 @@ export default class GraphingEngine {
         if (e.button === 0) {
             // Select node if not dragging
             if (this.state === State.IDLE) {
+
+                let isAnySelected = false;
+
                 for (const node of this.nodes) {
                     if (node.intersect(x, y)) {
                         node.selected = !node.selected;
+                        isAnySelected = true;
                         break;
                     }
                 }
+
+                if (!isAnySelected) {
+                    this.nodes.forEach(node => node.selected = false);
+                }
+
             } else if (this.state === State.GRABBING) {
                 this.setAll(false);
             }
+
             this.render();
+
         } else if (e.button === 2) {
             // Create new node
             this.addNode(new GraphNode(x, y))
@@ -284,7 +301,7 @@ export default class GraphingEngine {
 
     onkeyupHandler(e: KeyboardEvent) {
 
-        const selectedNodes = this.nodes.filter(n => n.selected);
+        const selectedNodes = this.nodes.filter(node => node.selected);
 
         switch (e.keyCode) {
             case 70:

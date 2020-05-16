@@ -22,7 +22,7 @@ export function readGraph(path: string): [GraphNode[], GraphEdge[]] {
 
     const nodes = [];
     for (const nodeData of data.nodes) {
-        nodes.push(new GraphNode(nodeData.x, nodeData.y, nodeData.color));
+        nodes.push(new GraphNode(nodeData.x, nodeData.y, nodeData.color, nodeData.name));
     }
 
     const edges = [];
@@ -56,6 +56,7 @@ export function writeGraph(path: string, nodes: GraphNode[], edges: GraphEdge[])
             x: node.x,
             y: node.y,
             color: node.color,
+            name: node.name,
         });
     }
 
