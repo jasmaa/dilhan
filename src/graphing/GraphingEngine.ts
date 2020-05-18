@@ -72,16 +72,24 @@ export default class GraphingEngine {
             return false;
         }
 
+        let isEdgeFound = false;
         for (const edge of this.edges) {
             if (edge.node1 === node1 && edge.node2 === node2 ||
                 edge.node1 === node2 && edge.node2 === node1) {
 
                 edge.n++;
-                return true;
+                isEdgeFound = true;
+                break;
             }
         }
 
-        return false;
+        if (!isEdgeFound) {
+            //selectedNodes[0].neighbors.push(selectedNodes[1]);
+            //selectedNodes[1].neighbors.push(selectedNodes[0]);
+            this.edges.push(new GraphEdge(node1, node2));
+        }
+
+        return true;
     }
 
     /**
@@ -307,12 +315,8 @@ export default class GraphingEngine {
             case 70:
                 // Edge addition
                 if (selectedNodes.length === 2 && this.state === State.IDLE) {
-                    const isEdgeFound = this.addEdge(selectedNodes[0], selectedNodes[1]);
-                    if (!isEdgeFound) {
-                        //selectedNodes[0].neighbors.push(selectedNodes[1]);
-                        //selectedNodes[1].neighbors.push(selectedNodes[0]);
-                        this.edges.push(new GraphEdge(selectedNodes[0], selectedNodes[1]));
-                    }
+                    
+                    this.addEdge(selectedNodes[0], selectedNodes[1]);
 
                     this.state = State.IDLE;
                     this.setAll(false);

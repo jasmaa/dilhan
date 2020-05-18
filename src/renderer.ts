@@ -2,7 +2,8 @@ import { remote, ipcRenderer } from 'electron';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import GraphingEngine from './graphing/GraphingEngine';
-import { readGraph, writeGraph, getLoadedFile, clearLoadedFile } from './serialize';
+import * as serialize from './graphing/serialize';
+import * as generator from './graphing/generator';
 import './styles.css';
 
 const dpr = window.devicePixelRatio || 1;
@@ -118,7 +119,7 @@ canvas.onkeyup = e => {
 
 const version = process.env.npm_package_version || remote.app.getVersion();
 
-ipcRenderer.on('menu', async (event, arg) => {
+ipcRenderer.on('file', async (event, arg) => {
     switch (arg) {
 
         case 'new':
@@ -126,7 +127,7 @@ ipcRenderer.on('menu', async (event, arg) => {
                 engine.clear();
                 engine.render();
 
-                clearLoadedFile();
+                serialize.clearLoadedFile();
                 ipcRenderer.send('setIsNeedSaving', true);
 
                 remote.getCurrentWindow().setTitle(`Untitled - Dilhan v${version}`);
@@ -146,7 +147,7 @@ ipcRenderer.on('menu', async (event, arg) => {
                 });
 
                 if (res.filePaths.length > 0) {
-                    const [readNodes, readEdges] = readGraph(res.filePaths[0]);
+                    const [readNodes, readEdges] = serialize.readGraph(res.filePaths[0]);
                     engine.nodes = readNodes;
                     engine.edges = readEdges;
                     engine.render();
@@ -163,9 +164,9 @@ ipcRenderer.on('menu', async (event, arg) => {
 
         case 'save':
             {
-                const loadedFile = getLoadedFile();
+                const loadedFile = serialize.getLoadedFile();
                 if (loadedFile) {
-                    writeGraph(loadedFile, engine.nodes, engine.edges);
+                    serialize.writeGraph(loadedFile, engine.nodes, engine.edges);
                     ipcRenderer.send('setIsNeedSaving', false);
                 }
             }
@@ -180,7 +181,7 @@ ipcRenderer.on('menu', async (event, arg) => {
                     }],
                 });
 
-                const isSaved = writeGraph(res.filePath, engine.nodes, engine.edges);
+                const isSaved = serialize.writeGraph(res.filePath, engine.nodes, engine.edges);
                 if (isSaved) {
 
                     ipcRenderer.send('setIsNeedSaving', false);
@@ -193,6 +194,17 @@ ipcRenderer.on('menu', async (event, arg) => {
             }
             break;
 
+        default:
+            break;
+    }
+});
+
+ipcRenderer.on('generate', async (event, arg) => {
+    switch (arg) {
+        case 'complete':
+            generator.createComplete(engine, 5);
+            engine.render();
+            break;
         default:
             break;
     }

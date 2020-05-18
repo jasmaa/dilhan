@@ -1,6 +1,9 @@
+// serialize.ts
+// Graph file operations
+
 import * as fs from 'fs';
-import GraphNode from './graphing/GraphNode';
-import GraphEdge from './graphing/GraphEdge';
+import GraphNode from './GraphNode';
+import GraphEdge from './GraphEdge';
 
 let loadedFile: string;
 

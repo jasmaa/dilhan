@@ -12,42 +12,55 @@ ipcMain.on('setIsNeedSaving', (event, arg) => {
 
 // === Menu ===
 
-const menuTemplate = [{
-    label: 'File',
-    submenu: [
-        {
-            label: 'New',
-            click() {
-                win.webContents.send('menu', 'new');
-            }
-        },
-        {
-            label: 'Open...',
-            async click() {
-                win.webContents.send('menu', 'open');
-            }
-        },
-        {
-            label: 'Save',
-            enabled: false,
-            async click() {
-                win.webContents.send('menu', 'save');
-            }
-        },
-        {
-            label: 'Save As...',
-            async click() {
-                win.webContents.send('menu', 'saveAs');
-            }
-        },
-        {
-            label: 'Exit',
-            click() {
-                app.quit();
-            }
-        },
-    ],
-}];
+const menuTemplate = [
+    {
+        label: 'File',
+        submenu: [
+            {
+                label: 'New',
+                click() {
+                    win.webContents.send('file', 'new');
+                }
+            },
+            {
+                label: 'Open...',
+                async click() {
+                    win.webContents.send('file', 'open');
+                }
+            },
+            {
+                label: 'Save',
+                enabled: false,
+                async click() {
+                    win.webContents.send('file', 'save');
+                }
+            },
+            {
+                label: 'Save As...',
+                async click() {
+                    win.webContents.send('file', 'saveAs');
+                }
+            },
+            {
+                label: 'Exit',
+                click() {
+                    app.quit();
+                }
+            },
+        ],
+    },
+    {
+        label: 'Generate',
+        submenu: [
+            {
+                label: 'Complete',
+                click() {
+                    win.webContents.send('generate', 'complete');
+                }
+            },
+        ],
+    },
+];
 
 ipcMain.on('setSaveEnabled', (event, arg) => {
     menuTemplate[0].submenu[2].enabled = arg;

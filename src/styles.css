@@ -7,6 +7,7 @@ html, body {
 
 canvas {
     background-color: white;
+    outline: none;
 }
 
 .color-picker {
