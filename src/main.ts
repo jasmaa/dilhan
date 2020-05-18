@@ -1,4 +1,4 @@
-import { app, dialog, ipcMain, BrowserWindow } from 'electron';
+import { app, dialog, ipcMain, BrowserWindow, Menu } from 'electron';
 
 let win: Electron.BrowserWindow;
 const version = process.env.npm_package_version || app.getVersion();
@@ -9,6 +9,54 @@ let isNeedSaving = false;
 ipcMain.on('setIsNeedSaving', (event, arg) => {
     isNeedSaving = arg;
 })
+
+// === Menu ===
+
+const menuTemplate = [{
+    label: 'File',
+    submenu: [
+        {
+            label: 'New',
+            click() {
+                win.webContents.send('menu', 'new');
+            }
+        },
+        {
+            label: 'Open...',
+            async click() {
+                win.webContents.send('menu', 'open');
+            }
+        },
+        {
+            label: 'Save',
+            enabled: false,
+            async click() {
+                win.webContents.send('menu', 'save');
+            }
+        },
+        {
+            label: 'Save As...',
+            async click() {
+                win.webContents.send('menu', 'saveAs');
+            }
+        },
+        {
+            label: 'Exit',
+            click() {
+                app.quit();
+            }
+        },
+    ],
+}];
+
+ipcMain.on('setSaveEnabled', (event, arg) => {
+    menuTemplate[0].submenu[2].enabled = arg;
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
+});
+
+
+// === Main app ===
 
 function createWindow() {
     win = new BrowserWindow({
@@ -24,6 +72,9 @@ function createWindow() {
     // win.webContents.openDevTools();
 
     win.loadFile('index.html');
+
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
 
     win.on('close', e => {
         if (isNeedSaving) {

@@ -114,16 +114,15 @@ canvas.onkeyup = e => {
     engine.onkeyupHandler(e);
 }
 
-// === Menu ===
+// === Menu handlers ===
 
 const version = process.env.npm_package_version || remote.app.getVersion();
 
-const menuTemplate = [{
-    label: 'File',
-    submenu: [
-        {
-            label: 'New',
-            click() {
+ipcRenderer.on('menu', async (event, arg) => {
+    switch (arg) {
+
+        case 'new':
+            {
                 engine.clear();
                 engine.render();
 
@@ -133,14 +132,12 @@ const menuTemplate = [{
                 remote.getCurrentWindow().setTitle(`Untitled - Dilhan v${version}`);
 
                 // Rebuild menu
-                menuTemplate[0].submenu[2].enabled = false;
-                const menu = remote.Menu.buildFromTemplate(menuTemplate);
-                remote.Menu.setApplicationMenu(menu);
+                ipcRenderer.send('setSaveEnabled', false);
             }
-        },
-        {
-            label: 'Open...',
-            async click() {
+            break;
+
+        case 'open':
+            {
                 const res = await remote.dialog.showOpenDialog({
                     properties: ['openFile'],
                     filters: [
@@ -159,26 +156,23 @@ const menuTemplate = [{
                     remote.getCurrentWindow().setTitle(`${res.filePaths[0]} - Dilhan v${version}`);
 
                     // Rebuild menu
-                    menuTemplate[0].submenu[2].enabled = true;
-                    const menu = remote.Menu.buildFromTemplate(menuTemplate);
-                    remote.Menu.setApplicationMenu(menu);
+                    ipcRenderer.send('setSaveEnabled', true);
                 }
             }
-        },
-        {
-            label: 'Save',
-            enabled: false,
-            async click() {
+            break;
+
+        case 'save':
+            {
                 const loadedFile = getLoadedFile();
                 if (loadedFile) {
                     writeGraph(loadedFile, engine.nodes, engine.edges);
                     ipcRenderer.send('setIsNeedSaving', false);
                 }
             }
-        },
-        {
-            label: 'Save As...',
-            async click() {
+            break;
+
+        case 'saveAs':
+            {
                 const res = await remote.dialog.showSaveDialog({
                     filters: [{
                         name: 'JSON',
@@ -194,20 +188,12 @@ const menuTemplate = [{
                     remote.getCurrentWindow().setTitle(`${res.filePath} - Dilhan v${version}`);
 
                     // Rebuild menu
-                    menuTemplate[0].submenu[2].enabled = true;
-                    const menu = remote.Menu.buildFromTemplate(menuTemplate);
-                    remote.Menu.setApplicationMenu(menu);
+                    ipcRenderer.send('setSaveEnabled', true);
                 }
             }
-        },
-        {
-            label: 'Exit',
-            click() {
-                remote.app.quit();
-            }
-        },
-    ],
-}];
+            break;
 
-const menu = remote.Menu.buildFromTemplate(menuTemplate);
-remote.Menu.setApplicationMenu(menu);
+        default:
+            break;
+    }
+});
