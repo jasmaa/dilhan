@@ -4,8 +4,8 @@
 import GraphingEngine from "./GraphingEngine";
 import GraphNode from "./GraphNode";
 
-const fallbackCentroidX = 200;
-const fallbackCentroidY = 150;
+const fallbackCentroidX = 400;
+const fallbackCentroidY = 300;
 const fallbackRadius = 100;
 
 interface CircleConfig {

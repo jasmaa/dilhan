@@ -53,15 +53,9 @@ const menuTemplate = [
         label: 'Generate',
         submenu: [
             {
-                label: 'Complete',
+                label: 'Common...',
                 click() {
-                    win.webContents.send('generate', 'complete');
-                }
-            },
-            {
-                label: 'Complete Bipartite',
-                click() {
-                    win.webContents.send('generate', 'completeBipartite');
+                    win.webContents.send('generate', 'common');
                 }
             },
         ],

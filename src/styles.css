@@ -55,11 +55,15 @@ canvas {
     color: white;
     background-color: rgba(0, 0, 0, 0.5);
     user-select: none;
+    z-index: 9000;
 }
 
 #generatePanel {
-    display: none;
+    position: fixed;
     visibility: hidden;
-    background-color: magenta;
+    background-color: rgba(0, 0, 0, 0.5);
+    max-height: 0;
+    transition: max-height 0.15s ease-out;
     user-select: none;
+    z-index: 9001;
 }
