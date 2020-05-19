@@ -19,6 +19,7 @@ interface CircleConfig {
  * 
  * @param engine 
  * @param n 
+ * @param config 
  */
 function createNodeCircle(engine: GraphingEngine, n: number, config: CircleConfig = {}): void {
 
@@ -37,10 +38,17 @@ function createNodeCircle(engine: GraphingEngine, n: number, config: CircleConfi
  * Creates complete graph
  * @param engine 
  * @param n 
+ * @param config 
  */
-export function createComplete(engine: GraphingEngine, n: number, config: CircleConfig = {}): void {
+export function createComplete(engine: GraphingEngine, n: number, config: CircleConfig = {}): boolean {
+
+    if (n < 1) {
+        return false;
+    }
 
     const start = engine.getNodeCount();
+
+    // Create circle base
     createNodeCircle(engine, n, config);
 
     for (let i = 0; i < n; i++) {
@@ -48,14 +56,22 @@ export function createComplete(engine: GraphingEngine, n: number, config: Circle
             engine.addEdge(engine.nodes[i + start], engine.nodes[j + start]);
         }
     }
+
+    return true;
 }
 
 /**
- * Creates complete graph
+ * Creates complete bipartite graph
  * @param engine 
- * @param n 
+ * @param n1 
+ * @param n2 
+ * @param config 
  */
-export function createBipartiteComplete(engine: GraphingEngine, n1: number, n2: number, config: CircleConfig = {}): void {
+export function createBipartiteComplete(engine: GraphingEngine, n1: number, n2: number, config: CircleConfig = {}): boolean {
+
+    if (n1 < 1 || n2 < 1) {
+        return false;
+    }
 
     const centroidX = config.centroidX || fallbackCentroidX;
     const centroidY = config.centroidY || fallbackCentroidY;
@@ -80,6 +96,8 @@ export function createBipartiteComplete(engine: GraphingEngine, n1: number, n2: 
             engine.addEdge(engine.nodes[i + start1], engine.nodes[j + start2]);
         }
     }
+
+    return true;
 }
 
 /**
@@ -87,19 +105,24 @@ export function createBipartiteComplete(engine: GraphingEngine, n1: number, n2: 
  * 
  * @param engine 
  * @param n 
+ * @param config 
  */
-export function createCycle(engine: GraphingEngine, n: number, config: CircleConfig = {}): void {
+export function createCycle(engine: GraphingEngine, n: number, config: CircleConfig = {}): boolean {
+
+    if (n < 3) {
+        return false;
+    }
 
     const start = engine.getNodeCount();
-    createNodeCircle(engine, n, config);
 
-    if (n <= 1) {
-        return;
-    }
+    // Create circle base
+    createNodeCircle(engine, n, config);
 
     for (let i = 0; i < n; i++) {
         engine.addEdge(engine.nodes[i % n + start], engine.nodes[(i + 1) % n + start]);
     }
+
+    return true;
 }
 
 /**
@@ -107,16 +130,20 @@ export function createCycle(engine: GraphingEngine, n: number, config: CircleCon
  * 
  * @param engine 
  * @param n 
+ * @param config 
  */
-export function createStar(engine: GraphingEngine, n: number, config: CircleConfig = {}): void {
+export function createStar(engine: GraphingEngine, n: number, config: CircleConfig = {}): boolean {
+
     if (n < 4) {
-        return;
+        return false;
     }
 
     const centroidX = config.centroidX || fallbackCentroidX;
     const centroidY = config.centroidY || fallbackCentroidY;
 
     const start = engine.getNodeCount();
+
+    // Create circle base
     createNodeCircle(engine, n - 1, config);
 
     const centerNode = new GraphNode(centroidX, centroidY);
@@ -124,6 +151,8 @@ export function createStar(engine: GraphingEngine, n: number, config: CircleConf
     for (let i = 0; i < n - 1; i++) {
         engine.addEdge(centerNode, engine.nodes[i + start]);
     }
+
+    return true;
 }
 
 /**
@@ -131,17 +160,20 @@ export function createStar(engine: GraphingEngine, n: number, config: CircleConf
  * 
  * @param engine 
  * @param n 
+ * @param config 
  */
-export function createWheel(engine: GraphingEngine, n: number, config: CircleConfig = {}): void {
+export function createWheel(engine: GraphingEngine, n: number, config: CircleConfig = {}): boolean {
 
     if (n < 4) {
-        return;
+        return true;
     }
 
     const centroidX = config.centroidX || fallbackCentroidX;
     const centroidY = config.centroidY || fallbackCentroidY;
 
     const start = engine.getNodeCount();
+
+    // Create circle base
     createCycle(engine, n - 1, config);
 
     const centerNode = new GraphNode(centroidX, centroidY);
@@ -149,4 +181,54 @@ export function createWheel(engine: GraphingEngine, n: number, config: CircleCon
     for (let i = 0; i < n - 1; i++) {
         engine.addEdge(centerNode, engine.nodes[i + start]);
     }
+
+    return true;
+}
+
+/**
+ * Create grid graph
+ * 
+ * @param engine 
+ * @param n1 
+ * @param n2 
+ * @param config 
+ */
+export function createGrid(engine: GraphingEngine, n1: number, n2: number, config: CircleConfig = {}): boolean {
+
+    if (n1 < 1 || n2 < 1) {
+        return false;
+    }
+
+    const centroidX = config.centroidX || fallbackCentroidX;
+    const centroidY = config.centroidY || fallbackCentroidY;
+    const radius = config.radius || fallbackRadius;
+
+    const start = engine.getNodeCount();
+
+    // Add nodes
+    for (let i = 0; i < n1; i++) {
+        for (let j = 0; j < n2; j++) {
+            engine.addNode(new GraphNode(i * radius + centroidX, j * radius + centroidY));
+        }
+    }
+
+    // Add horizontal edges
+    for (let i = 0; i < n1; i++) {
+        for (let j = 0; j < n2 - 1; j++) {
+            const currNode = engine.nodes[n2 * i + j + start];
+            const rightNode = engine.nodes[n2 * i + (j + 1) + start];
+            engine.addEdge(currNode, rightNode);
+        }
+    }
+
+    // Add vertical edges
+    for (let i = 0; i < n1 - 1; i++) {
+        for (let j = 0; j < n2; j++) {
+            const currNode = engine.nodes[n2 * i + j + start];
+            const downNode = engine.nodes[n2 * (i + 1) + j + start];
+            engine.addEdge(currNode, downNode);
+        }
+    }
+
+    return true;
 }

@@ -14,29 +14,29 @@ const ctx = canvas.getContext('2d');
 const nodeCountElement = document.getElementById('nodeCount');
 const edgeCountElement = document.getElementById('edgeCount');
 
-/**
- * Set visibility of panel
- * 
- * @param visible 
- */
-function setPanelVisible(panel: HTMLElement, visible: boolean): void {
-    if (visible) {
-        panel.style.maxHeight = '20em';
-        panel.style.visibility = 'visible';
-    } else {
-        panel.style.maxHeight = '0em';
-        setTimeout(() => panel.style.visibility = 'hidden', 150);
-    }
-
-    isControlPanelOpen = visible;
-}
-
 // === Control Panel ===
 
 const controlPanelElement = document.getElementById('controlPanel');
 const colorSelectElements = document.getElementsByClassName('color-radio');
 const nodeNameInputElement = <HTMLInputElement>document.getElementById('nodeNameInput');
 let isControlPanelOpen = false;
+
+/**
+ * Set visibility of control panel
+ * 
+ * @param visible 
+ */
+function setControlPanelVisible(visible: boolean): void {
+    if (visible) {
+        controlPanelElement.style.maxHeight = '20em';
+        controlPanelElement.style.visibility = 'visible';
+    } else {
+        controlPanelElement.style.maxHeight = '0em';
+        setTimeout(() => controlPanelElement.style.visibility = 'hidden', 150);
+    }
+
+    isControlPanelOpen = visible;
+}
 
 // Node color handlers
 for (const v of Array.from(colorSelectElements)) {
@@ -68,6 +68,20 @@ const generateCreateElement = document.getElementById('generateCreate');
 const generateBackElement = document.getElementById('generateBack');
 let generatingGraphType = 'complete';
 
+/**
+ * Set visibility of generate panel
+ * 
+ * @param visible 
+ */
+function setGeneratePanelVisible(visible: boolean): void {
+    if (visible) {
+        generatePanelElement.style.maxHeight = '20em';
+        generatePanelElement.style.visibility = 'visible';
+    } else {
+        generatePanelElement.style.maxHeight = '0em';
+        setTimeout(() => generatePanelElement.style.visibility = 'hidden', 150);
+    }
+}
 
 function setGeneratePanelGraphType(): void {
     switch (generatingGraphType) {
@@ -95,38 +109,39 @@ generateCreateElement.onclick = () => {
     const n1 = parseInt(generateN1Element.value);
     const n2 = parseInt(generateN2Element.value);
 
+    let isDidGraph = false;
     switch (generatingGraphType) {
         case 'complete':
-            generator.createComplete(engine, n1);
-            engine.render();
+            isDidGraph = generator.createComplete(engine, n1);
             break;
         case 'cycle':
-            generator.createCycle(engine, n1);
-            engine.render();
+            isDidGraph = generator.createCycle(engine, n1);
             break;
         case 'star':
-            generator.createStar(engine, n1);
-            engine.render();
+            isDidGraph = generator.createStar(engine, n1);
             break;
         case 'wheel':
-            generator.createWheel(engine, n1);
-            engine.render();
+            isDidGraph = generator.createWheel(engine, n1);
             break;
         case 'completeBipartite':
-            generator.createBipartiteComplete(engine, n1, n2);
-            engine.render();
+            isDidGraph = generator.createBipartiteComplete(engine, n1, n2);
             break;
         case 'grid':
+            isDidGraph = generator.createGrid(engine, n1, n2);
             break;
         default:
             break;
     }
 
-    setPanelVisible(generatePanelElement, false);
+    if (isDidGraph) {
+        engine.render();
+    }
+
+    setGeneratePanelVisible(false);
 }
 
 generateBackElement.onclick = () => {
-    setPanelVisible(generatePanelElement, false);
+    setGeneratePanelVisible(false);
 }
 
 
@@ -149,10 +164,10 @@ const engine = new GraphingEngine(ctx, dpr, (engine: GraphingEngine) => {
 
         nodeNameInputElement.value = selectedNodes[0].name;
 
-        setPanelVisible(controlPanelElement, true);
+        setControlPanelVisible(true);
 
     } else if (selectedNodes.length !== 1 && isControlPanelOpen) {
-        setPanelVisible(controlPanelElement, false);
+        setControlPanelVisible(false);
     }
 
     // Update save state
@@ -276,7 +291,7 @@ ipcRenderer.on('file', async (event, arg) => {
 ipcRenderer.on('generate', async (event, arg) => {
     switch (arg) {
         case 'common':
-            setPanelVisible(generatePanelElement, true);
+            setGeneratePanelVisible(true);
             setGeneratePanelGraphType();
             break;
         default:
