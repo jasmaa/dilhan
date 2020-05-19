@@ -11,12 +11,15 @@ const dpr = window.devicePixelRatio || 1;
 const canvas = <HTMLCanvasElement>document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
-const controlPanelElement = document.getElementById('controlPanel');
 const nodeCountElement = document.getElementById('nodeCount');
 const edgeCountElement = document.getElementById('edgeCount');
+
+
+// === Control Panel ===
+
+const controlPanelElement = document.getElementById('controlPanel');
 const colorSelectElements = document.getElementsByClassName('color-radio');
 const nodeNameInputElement = <HTMLInputElement>document.getElementById('nodeNameInput');
-
 let isControlPanelOpen = false;
 
 /**
@@ -37,8 +40,7 @@ function setControlPanelVisible(visible: boolean): void {
     isControlPanelOpen = visible;
 }
 
-// === Init handlers ===
-
+// Node color handlers
 for (const v of Array.from(colorSelectElements)) {
     const colorCell = <HTMLInputElement>v;
     colorCell.onclick = () => {
@@ -49,6 +51,7 @@ for (const v of Array.from(colorSelectElements)) {
     }
 }
 
+// Node name handler
 nodeNameInputElement.oninput = e => {
     engine.nodes
         .filter(node => node.selected)
@@ -56,6 +59,84 @@ nodeNameInputElement.oninput = e => {
     engine.render();
 }
 
+
+// === Generate Panel ===
+
+const generatePanelElement = document.getElementById('generatePanel');
+const generateN1Element = <HTMLInputElement>document.getElementById('generateN1');
+const generateN2Element = <HTMLInputElement>document.getElementById('generateN2');
+const generateCreateElement = document.getElementById('generateCreate');
+const generateBackElement = document.getElementById('generateBack');
+let generatingGraphType: string;
+
+function setGeneratePanelVisible(visible: boolean, graphType: string = ''): void {
+    if (visible) {
+        generatePanelElement.style.display = 'block';
+        generatePanelElement.style.visibility = 'visible';
+
+        generatingGraphType = graphType;
+
+        switch (graphType) {
+            case 'complete':
+            case 'cycle':
+            case 'star':
+            case 'wheel':
+                generateN2Element.style.display = 'none';
+                break;
+            case 'completeBipartite':
+            case 'grid':
+            default:
+                generateN2Element.style.display = 'block';
+                break;
+        }
+
+    } else {
+        generatePanelElement.style.display = 'none';
+        generatePanelElement.style.visibility = 'hidden';
+    }
+}
+
+generateCreateElement.onclick = () => {
+
+    const n1 = parseInt(generateN1Element.value);
+    const n2 = parseInt(generateN2Element.value);
+
+    switch (generatingGraphType) {
+        case 'complete':
+            generator.createComplete(engine, n1);
+            engine.render();
+            break;
+        case 'cycle':
+            generator.createCycle(engine, n1);
+            engine.render();
+            break;
+        case 'star':
+            generator.createStar(engine, n1);
+            engine.render();
+            break;
+        case 'wheel':
+            generator.createWheel(engine, n1);
+            engine.render();
+            break;
+        case 'completeBipartite':
+            generator.createBipartiteComplete(engine, n1, n2);
+            engine.render();
+            break;
+        case 'grid':
+            break;
+        default:
+            break;
+    }
+
+    setGeneratePanelVisible(false);
+}
+
+generateBackElement.onclick = () => {
+    setGeneratePanelVisible(false);
+}
+
+
+// === Engine ===
 
 const engine = new GraphingEngine(ctx, dpr, (engine: GraphingEngine) => {
 
@@ -85,7 +166,7 @@ const engine = new GraphingEngine(ctx, dpr, (engine: GraphingEngine) => {
     ipcRenderer.send('setIsNeedSaving', true);
 });
 
-// === Event handlers ===
+// === Canvas handlers ===
 
 function resize(): void {
     canvas.width = window.innerWidth;
@@ -200,12 +281,5 @@ ipcRenderer.on('file', async (event, arg) => {
 });
 
 ipcRenderer.on('generate', async (event, arg) => {
-    switch (arg) {
-        case 'complete':
-            generator.createComplete(engine, 5);
-            engine.render();
-            break;
-        default:
-            break;
-    }
+    setGeneratePanelVisible(true, arg);
 });

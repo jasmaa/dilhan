@@ -58,6 +58,12 @@ const menuTemplate = [
                     win.webContents.send('generate', 'complete');
                 }
             },
+            {
+                label: 'Complete Bipartite',
+                click() {
+                    win.webContents.send('generate', 'completeBipartite');
+                }
+            },
         ],
     },
 ];
@@ -77,6 +83,7 @@ function createWindow() {
         height: 600,
         width: 800,
         icon: 'src/logo.png',
+        show: false,
         webPreferences: {
             nodeIntegration: true,
         },
@@ -88,6 +95,10 @@ function createWindow() {
 
     const menu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(menu);
+
+    win.once('ready-to-show', () => {
+        win.show();
+    });
 
     win.on('close', e => {
         if (isNeedSaving) {

@@ -56,3 +56,10 @@ canvas {
     background-color: rgba(0, 0, 0, 0.5);
     user-select: none;
 }
+
+#generatePanel {
+    display: none;
+    visibility: hidden;
+    background-color: magenta;
+    user-select: none;
+}
