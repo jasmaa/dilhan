@@ -1,6 +1,6 @@
 import GraphNode from './GraphNode';
 import GraphEdge from './GraphEdge';
-import { calculateControl } from '../utils';
+import { findMousePosition, calculateControl } from '../utils';
 
 enum State {
     DRAGGING,
@@ -17,14 +17,18 @@ export default class GraphingEngine {
     edges: GraphEdge[] = [];
     state = State.IDLE;
 
-    private ctx: CanvasRenderingContext2D
+    private ctx: CanvasRenderingContext2D;
+    private dpr: number;
+    private renderCallback: Function;
     private draggingNodes: GraphNode[] = [];
     private prevX: number;
     private prevY: number;
     private isMouseDown = false;
 
-    constructor(ctx: CanvasRenderingContext2D) {
+    constructor(ctx: CanvasRenderingContext2D, dpr: number, renderCallback: Function) {
         this.ctx = ctx;
+        this.dpr = dpr;
+        this.renderCallback = renderCallback;
     }
 
     /**
@@ -68,16 +72,24 @@ export default class GraphingEngine {
             return false;
         }
 
+        let isEdgeFound = false;
         for (const edge of this.edges) {
             if (edge.node1 === node1 && edge.node2 === node2 ||
                 edge.node1 === node2 && edge.node2 === node1) {
 
                 edge.n++;
-                return true;
+                isEdgeFound = true;
+                break;
             }
         }
 
-        return false;
+        if (!isEdgeFound) {
+            //selectedNodes[0].neighbors.push(selectedNodes[1]);
+            //selectedNodes[1].neighbors.push(selectedNodes[0]);
+            this.edges.push(new GraphEdge(node1, node2));
+        }
+
+        return true;
     }
 
     /**
@@ -89,7 +101,12 @@ export default class GraphingEngine {
         // Node deletion
         for (const node of nodes) {
 
-            this.nodes.splice(this.nodes.indexOf(node), 1);
+            let idx = this.nodes.indexOf(node);
+            if (idx < 0) {
+                continue;
+            }
+
+            this.nodes.splice(idx, 1);
 
             const edgeBuffer = [...this.edges]; // Make a buffer for looping
             for (const edge of edgeBuffer) {
@@ -97,6 +114,7 @@ export default class GraphingEngine {
                     this.edges.splice(this.edges.indexOf(edge), 1);
                 }
             }
+
         }
         return true;
     }
@@ -140,18 +158,24 @@ export default class GraphingEngine {
      */
     render() {
 
-        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width * this.dpr, this.ctx.canvas.height * this.dpr);
+
+        this.ctx.lineWidth = 3 * this.dpr;
 
         // Render edges
         for (const edge of this.edges) {
 
-            this.ctx.strokeStyle = 'cyan';
+            this.ctx.strokeStyle = 'black';
 
             for (let i = 0; i < edge.n; i++) {
                 this.ctx.beginPath();
-                this.ctx.moveTo(edge.node1.x, edge.node1.y);
-                const { x, y } = calculateControl(edge.node1.x, edge.node1.y, edge.node2.x, edge.node2.y, 30, i);
-                this.ctx.quadraticCurveTo(x, y, edge.node2.x, edge.node2.y);
+                this.ctx.moveTo(edge.node1.x * this.dpr, edge.node1.y * this.dpr);
+                const { x, y } = calculateControl(
+                    edge.node1.x, edge.node1.y,
+                    edge.node2.x, edge.node2.y,
+                    30, i
+                );
+                this.ctx.quadraticCurveTo(x * this.dpr, y * this.dpr, edge.node2.x * this.dpr, edge.node2.y * this.dpr);
                 this.ctx.stroke();
                 this.ctx.closePath();
             }
@@ -161,23 +185,29 @@ export default class GraphingEngine {
         for (const node of this.nodes) {
 
             if (node.selected) {
-                this.ctx.fillStyle = 'red';
-            } else {
-                this.ctx.fillStyle = 'black';
+                this.ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                this.ctx.beginPath();
+                this.ctx.arc(node.x * this.dpr, node.y * this.dpr, 1.5 * node.r * this.dpr, 0, 2 * Math.PI);
+                this.ctx.fill();
+                this.ctx.closePath();
             }
 
+            this.ctx.fillStyle = node.color;
+            this.ctx.strokeStyle = 'black';
             this.ctx.beginPath();
-            this.ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI);
+            this.ctx.arc(node.x * this.dpr, node.y * this.dpr, node.r * this.dpr, 0, 2 * Math.PI);
             this.ctx.fill();
+            this.ctx.stroke();
             this.ctx.closePath();
+
+            if (node.name.length > 0) {
+                this.ctx.fillStyle = 'red';
+                this.ctx.font = `${20 * this.dpr}px Arial`;
+                this.ctx.fillText(node.name, node.x * this.dpr, (node.y - 20) * this.dpr);
+            }
         }
 
-        // Render graph info
-        this.ctx.fillStyle = 'black';
-        this.ctx.textBaseline = 'hanging';
-        this.ctx.font = "20px Arial";
-        this.ctx.fillText(`Nodes: ${this.getNodeCount()}`, 10, 10);
-        this.ctx.fillText(`Edges: ${this.getEdgeCount()}`, 10, 40);
+        this.renderCallback(this);
     }
 
     /**
@@ -193,14 +223,17 @@ export default class GraphingEngine {
     // === Handlers ===
 
     onmousedownHandler(e: MouseEvent) {
+
+        const { x, y } = findMousePosition(this.ctx.canvas, e);
+
         // Drag
         if (e.button === 0) {
 
-            this.prevX = e.x;
-            this.prevY = e.y;
+            this.prevX = x;
+            this.prevY = y;
 
             for (const node of this.nodes) {
-                if (node.intersect(e.x, e.y)) {
+                if (node.intersect(x, y)) {
                     this.draggingNodes = [node];
                     break;
                 }
@@ -212,6 +245,8 @@ export default class GraphingEngine {
 
     onmousemoveHandler(e: MouseEvent) {
 
+        const { x, y } = findMousePosition(this.ctx.canvas, e);
+
         if (this.isMouseDown) {
             this.state = State.DRAGGING;
         }
@@ -219,8 +254,8 @@ export default class GraphingEngine {
         // Drag nodes
         if (this.state === State.DRAGGING || this.state === State.GRABBING) {
 
-            const diffX = e.x - this.prevX;
-            const diffY = e.y - this.prevY;
+            const diffX = x - this.prevX;
+            const diffY = y - this.prevY;
 
             for (const node of this.draggingNodes) {
                 node.x += diffX;
@@ -230,28 +265,41 @@ export default class GraphingEngine {
             this.render();
         }
 
-        this.prevX = e.x;
-        this.prevY = e.y;
+        this.prevX = x;
+        this.prevY = y;
     }
 
     onmouseupHandler(e: MouseEvent) {
 
+        const { x, y } = findMousePosition(this.ctx.canvas, e);
+
         if (e.button === 0) {
             // Select node if not dragging
             if (this.state === State.IDLE) {
+
+                let isAnySelected = false;
+
                 for (const node of this.nodes) {
-                    if (node.intersect(e.x, e.y)) {
+                    if (node.intersect(x, y)) {
                         node.selected = !node.selected;
+                        isAnySelected = true;
                         break;
                     }
                 }
+
+                if (!isAnySelected) {
+                    this.nodes.forEach(node => node.selected = false);
+                }
+
             } else if (this.state === State.GRABBING) {
                 this.setAll(false);
             }
+
             this.render();
+
         } else if (e.button === 2) {
             // Create new node
-            this.addNode(new GraphNode(e.x, e.y))
+            this.addNode(new GraphNode(x, y))
             this.setAll(false);
             this.render();
         }
@@ -267,18 +315,14 @@ export default class GraphingEngine {
 
     onkeyupHandler(e: KeyboardEvent) {
 
-        const selectedNodes = this.nodes.filter(n => n.selected);
+        const selectedNodes = this.nodes.filter(node => node.selected);
 
         switch (e.keyCode) {
             case 70:
                 // Edge addition
                 if (selectedNodes.length === 2 && this.state === State.IDLE) {
-                    const isEdgeFound = this.addEdge(selectedNodes[0], selectedNodes[1]);
-                    if (!isEdgeFound) {
-                        //selectedNodes[0].neighbors.push(selectedNodes[1]);
-                        //selectedNodes[1].neighbors.push(selectedNodes[0]);
-                        this.edges.push(new GraphEdge(selectedNodes[0], selectedNodes[1]));
-                    }
+
+                    this.addEdge(selectedNodes[0], selectedNodes[1]);
 
                     this.state = State.IDLE;
                     this.setAll(false);

@@ -1,4 +1,17 @@
 /**
+ * Find mouse position on canvas
+ * @param canvas 
+ * @param e 
+ */
+export function findMousePosition(canvas: HTMLCanvasElement, e: MouseEvent) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
+}
+
+/**
  * Calculate control point for quad curve
  * 
  * @param x1 Node 1 x

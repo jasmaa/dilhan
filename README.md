@@ -1,5 +1,7 @@
 # Dilhan
 
+[![CircleCI](https://circleci.com/gh/jasmaa/dilhan.svg?style=svg)](https://circleci.com/gh/jasmaa/dilhan)
+
 <img src="docs/screenshot_01.png" width="600">
 
 Dilhan is a tool for creating and analyzing undirected graphs.

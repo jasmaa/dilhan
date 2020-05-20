@@ -1,8 +1,18 @@
+// serialize.ts
+// Graph file operations
+
 import * as fs from 'fs';
-import GraphNode from './graphing/GraphNode';
-import GraphEdge from './graphing/GraphEdge';
+import GraphNode from './GraphNode';
+import GraphEdge from './GraphEdge';
 
 let loadedFile: string;
+
+/**
+ * Clears loaded file
+ */
+export function clearLoadedFile(): void {
+    loadedFile = undefined;
+}
 
 /**
  * Gets loaded file
@@ -22,7 +32,7 @@ export function readGraph(path: string): [GraphNode[], GraphEdge[]] {
 
     const nodes = [];
     for (const nodeData of data.nodes) {
-        nodes.push(new GraphNode(nodeData.x, nodeData.y));
+        nodes.push(new GraphNode(nodeData.x, nodeData.y, nodeData.color, nodeData.name));
     }
 
     const edges = [];
@@ -55,6 +65,8 @@ export function writeGraph(path: string, nodes: GraphNode[], edges: GraphEdge[])
         writeNodes.push({
             x: node.x,
             y: node.y,
+            color: node.color,
+            name: node.name,
         });
     }
 

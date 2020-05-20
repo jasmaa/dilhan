@@ -1,4 +1,4 @@
-import { app, dialog, ipcMain, BrowserWindow } from 'electron';
+import { app, dialog, ipcMain, BrowserWindow, Menu } from 'electron';
 
 let win: Electron.BrowserWindow;
 const version = process.env.npm_package_version || app.getVersion();
@@ -10,12 +10,74 @@ ipcMain.on('setIsNeedSaving', (event, arg) => {
     isNeedSaving = arg;
 })
 
+// === Menu ===
+
+const menuTemplate = [
+    {
+        label: 'File',
+        submenu: [
+            {
+                label: 'New',
+                click() {
+                    win.webContents.send('file', 'new');
+                }
+            },
+            {
+                label: 'Open...',
+                async click() {
+                    win.webContents.send('file', 'open');
+                }
+            },
+            {
+                label: 'Save',
+                enabled: false,
+                async click() {
+                    win.webContents.send('file', 'save');
+                }
+            },
+            {
+                label: 'Save As...',
+                async click() {
+                    win.webContents.send('file', 'saveAs');
+                }
+            },
+            {
+                label: 'Exit',
+                click() {
+                    app.quit();
+                }
+            },
+        ],
+    },
+    {
+        label: 'Generate',
+        submenu: [
+            {
+                label: 'Common...',
+                click() {
+                    win.webContents.send('generate', 'common');
+                }
+            },
+        ],
+    },
+];
+
+ipcMain.on('setSaveEnabled', (event, arg) => {
+    menuTemplate[0].submenu[2].enabled = arg;
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
+});
+
+
+// === Main app ===
+
 function createWindow() {
     win = new BrowserWindow({
         title: `Untitled - Dilhan v${version}`,
         height: 600,
         width: 800,
         icon: 'src/logo.png',
+        show: false,
         webPreferences: {
             nodeIntegration: true,
         },
@@ -24,6 +86,13 @@ function createWindow() {
     // win.webContents.openDevTools();
 
     win.loadFile('index.html');
+
+    const menu = Menu.buildFromTemplate(menuTemplate);
+    Menu.setApplicationMenu(menu);
+
+    win.once('ready-to-show', () => {
+        win.show();
+    });
 
     win.on('close', e => {
         if (isNeedSaving) {

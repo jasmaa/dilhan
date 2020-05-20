@@ -6,8 +6,77 @@
 </head>
 
 <body>
+    <div id="generatePanel" class="w-100 p-3">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6 d-flex align-items-center">
+                    <select id="generateGraphTypeSelect" class="form-control-sm mx-1">
+                        <option value="complete">Complete</option>
+                        <option value="completeBipartite">Complete Bipartite</option>
+                        <option value="cycle">Cycle</option>
+                        <option value="star">Star</option>
+                        <option value="wheel">Wheel</option>
+                        <option value="grid">Grid</option>
+                    </select>
+                    <input id="generateN1" class="form-control form-control-sm mx-1" type="number" placeholder="n" />
+                    <input id="generateN2" class="form-control form-control-sm mx-1" type="number" placeholder="m" />
+                </div>
+                <div class="col-6 d-flex align-items-center justify-content-end">
+                    <div id="generateCreate" class="btn btn-primary btn-sm mx-1">Create</div>
+                    <div id="generateBack" class="btn btn-info btn-sm mx-1">Back</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <canvas id="mainCanvas"></canvas>
+    <div id="controlPanel" class="d-flex w-100 p-3 align-items-center">
+        <div class="color-picker mx-3">
+            <label class="color-cell m-1">
+                <input class="color-radio" type="radio" name="color" value="#0275d8">
+                <span class="checkmark" style="background-color: #0275d8;"></span>
+            </label>
+            <label class="color-cell m-1">
+                <input class="color-radio" type="radio" name="color" value="#5cb85c">
+                <span class="checkmark" style="background-color: #5cb85c;"></span>
+            </label>
+            <label class="color-cell m-1">
+                <input class="color-radio" type="radio" name="color" value="#5bc0de">
+                <span class="checkmark" style="background-color: #5bc0de;"></span>
+            </label>
+            <label class="color-cell m-1">
+                <input class="color-radio" type="radio" name="color" value="#f0ad4e">
+                <span class="checkmark" style="background-color: #f0ad4e;"></span>
+            </label>
+            <label class="color-cell m-1">
+                <input class="color-radio" type="radio" name="color" value="#d9534f">
+                <span class="checkmark" style="background-color: #d9534f;"></span>
+            </label>
+            <label class="color-cell m-1">
+                <input class="color-radio" type="radio" name="color" value="#292b2c">
+                <span class="checkmark" style="background-color: #292b2c;"></span>
+            </label>
+            <label class="color-cell m-1">
+                <input class="color-radio" type="radio" name="color" value="#f7f7f7">
+                <span class="checkmark" style="background-color: #f7f7f7;"></span>
+            </label>
+        </div>
+
+        <div class="mx-3">
+            <input id="nodeNameInput" class="form-control-sm" />
+        </div>
+    </div>
+
+    <canvas id="mainCanvas" tabindex="1"></canvas>
+
+    <div id="infoPanel" class="d-flex justify-content-between w-100 p-1">
+        <div>
+            <span id="nodeCount" class="m-1"></span>
+            <span id="edgeCount" class="m-1"></span>
+        </div>
+        <div>
+
+        </div>
+    </div>
 
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>
