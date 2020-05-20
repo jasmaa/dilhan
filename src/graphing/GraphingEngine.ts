@@ -101,7 +101,12 @@ export default class GraphingEngine {
         // Node deletion
         for (const node of nodes) {
 
-            this.nodes.splice(this.nodes.indexOf(node), 1);
+            let idx = this.nodes.indexOf(node);
+            if (idx < 0) {
+                continue;
+            }
+
+            this.nodes.splice(idx, 1);
 
             const edgeBuffer = [...this.edges]; // Make a buffer for looping
             for (const edge of edgeBuffer) {
@@ -109,6 +114,7 @@ export default class GraphingEngine {
                     this.edges.splice(this.edges.indexOf(edge), 1);
                 }
             }
+
         }
         return true;
     }
@@ -315,7 +321,7 @@ export default class GraphingEngine {
             case 70:
                 // Edge addition
                 if (selectedNodes.length === 2 && this.state === State.IDLE) {
-                    
+
                     this.addEdge(selectedNodes[0], selectedNodes[1]);
 
                     this.state = State.IDLE;

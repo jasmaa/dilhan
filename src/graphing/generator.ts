@@ -165,7 +165,7 @@ export function createStar(engine: GraphingEngine, n: number, config: CircleConf
 export function createWheel(engine: GraphingEngine, n: number, config: CircleConfig = {}): boolean {
 
     if (n < 4) {
-        return true;
+        return false;
     }
 
     const centroidX = config.centroidX || fallbackCentroidX;
