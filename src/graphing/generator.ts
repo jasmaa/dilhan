@@ -195,6 +195,8 @@ export function createWheel(engine: GraphingEngine, n: number, config: CircleCon
  */
 export function createGrid(engine: GraphingEngine, n1: number, n2: number, config: CircleConfig = {}): boolean {
 
+    // TODO: Do centering and sizing
+
     if (n1 < 1 || n2 < 1) {
         return false;
     }
