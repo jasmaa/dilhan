@@ -269,56 +269,56 @@ describe('Common generators', () => {
                 engine = new GraphingEngine(null, null, () => { });
             });
 
-            it('creates K_{1,1}', () => {
+            it('creates G_{1,1}', () => {
                 const res = generator.createGrid(engine, 1, 1);
                 expect(res).to.be.true;
                 expect(engine.getNodeCount()).to.equal(1);
                 expect(engine.getEdgeCount()).to.equal(0);
             });
 
-            it('creates K_{5,3}', () => {
+            it('creates G_{5,3}', () => {
                 const res = generator.createGrid(engine, 5, 3);
                 expect(res).to.be.true;
                 expect(engine.getNodeCount()).to.equal(15);
                 expect(engine.getEdgeCount()).to.equal(22);
             });
 
-            it('creates K_{3,5}', () => {
+            it('creates G_{3,5}', () => {
                 const res = generator.createGrid(engine, 3, 5);
                 expect(res).to.be.true;
                 expect(engine.getNodeCount()).to.equal(15);
                 expect(engine.getEdgeCount()).to.equal(22);
             });
 
-            it('fails to create K_{0,5}', () => {
+            it('fails to create G_{0,5}', () => {
                 const res = generator.createGrid(engine, 0, 5);
                 expect(res).to.be.false;
                 expect(engine.getNodeCount()).to.equal(0);
                 expect(engine.getEdgeCount()).to.equal(0);
             });
 
-            it('fails to create K_{5,0}', () => {
+            it('fails to create G_{5,0}', () => {
                 const res = generator.createGrid(engine, 5, 0);
                 expect(res).to.be.false;
                 expect(engine.getNodeCount()).to.equal(0);
                 expect(engine.getEdgeCount()).to.equal(0);
             });
 
-            it('fails to create K_{0,0}', () => {
+            it('fails to create G_{0,0}', () => {
                 const res = generator.createGrid(engine, 0, 0);
                 expect(res).to.be.false;
                 expect(engine.getNodeCount()).to.equal(0);
                 expect(engine.getEdgeCount()).to.equal(0);
             });
 
-            it('fails to create K_{-1,0}', () => {
+            it('fails to create G_{-1,0}', () => {
                 const res = generator.createGrid(engine, -1, 0);
                 expect(res).to.be.false;
                 expect(engine.getNodeCount()).to.equal(0);
                 expect(engine.getEdgeCount()).to.equal(0);
             });
 
-            it('fails to create K_{0,-1}', () => {
+            it('fails to create G_{0,-1}', () => {
                 const res = generator.createGrid(engine, 0, -1);
                 expect(res).to.be.false;
                 expect(engine.getNodeCount()).to.equal(0);

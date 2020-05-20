@@ -1,5 +1,6 @@
 # Dilhan
 
+[![GitHub version](https://badge.fury.io/gh/jasmaa%2Fdilhan.svg)](https://badge.fury.io/gh/jasmaa%2Fdilhan)
 [![CircleCI](https://circleci.com/gh/jasmaa/dilhan.svg?style=svg)](https://circleci.com/gh/jasmaa/dilhan)
 
 <img src="docs/screenshot_01.png" width="600">
